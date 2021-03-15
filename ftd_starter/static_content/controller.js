@@ -2,8 +2,9 @@ var stage=null;
 var view = null;
 var interval=null;
 var credentials={ "username": "", "password":"" };
-
+var pausedGame = false;
 const SPEED = 3;
+
 function setupGame(){
 	stage=new Stage(document.getElementById('stage'));
 
@@ -18,12 +19,17 @@ function setupGame(){
 	
 }
 function startGame(){
-	interval=setInterval(function(){ stage.step(); stage.draw();}, 20);
+	animate();
+}
+function animate() {
+	stage.step();
+	stage.draw();
+	if (pausedGame) { pauseGame(); }
+	else { 	requestAnimationFrame(animate);	}
 }
 function pauseGame(){
-	clearInterval(interval);
-	interval=null;
-	
+	console.log('here');
+	//stage.pauseGame(pausedGame);
 	var context = stage.canvas.getContext('2d');
 	context.fillStyle = 'rgba(0,0,0,0.5)';
 	context.fillRect(0, 0, stage.width, stage.height);
@@ -44,7 +50,6 @@ function getMousePos(event) {
 					(event.clientX - rect.left) / (rect.right - rect.left) * stage.canvas.width,
 					(event.clientY - rect.top) / (rect.bottom - rect.top) * stage.canvas.height);
 }
-
 function actionByKey(event){
 
 	var key = event.key;
@@ -57,34 +62,36 @@ function actionByKey(event){
 	if(key in moveMap){
 		stage.player.velocity=moveMap[key];
 	} else if (key=='p'){
-		if (interval == null){
-			startGame();
-		} else {
+		pausedGame = (!pausedGame);
+		if (pausedGame != false){
 			pauseGame();
+		} else {
+			startGame();
 		}
 	}
 		
 }
 
-
 function stopMoving(event){
 	stage.player.velocity=new Pair(0,0);
 }
-
 
 function aimByMouse(event){
 	//console.log(getMousePos(event).x + " " + getMousePos(event).y);
 	stage.player.aim_pos = getMousePos(event);
 }
 
-
 function shootByMouse(event){
 	
 	var mouse_pos = getMousePos(event);
-	
+	console.log(mouse_pos.x + " " + mouse_pos.y);
+	console.log(stage.player.turret_pos);
+	console.log("bye");
+
 	//If unpaused and click within canvas
-	if (interval && mouse_pos.x>=0 && mouse_pos.x<=stage.width &&
+	if (mouse_pos.x>=0 && mouse_pos.x<=stage.width &&
 		mouse_pos.y>=0 && mouse_pos.y<=stage.height){
+		console.log("hi");
 		//If player has ammo, shoot a bullet from turret, decrease ammo count
 		if (stage.player.ammo > 0){
 			
@@ -93,9 +100,9 @@ function shootByMouse(event){
 			
 			stage.addActor(new Bullet(stage, new Pair(bullet_pos_x, bullet_pos_y), 
 										new Pair(0, 0), 'rgba(0,255,0,1)', 3, 0, "Player"));
+										
+			console.log(new Pair(bullet_pos_x, bullet_pos_y));
 		
-			console.log(stage.getActor(Math.round(bullet_pos_x), 
-							Math.round(bullet_pos_y)));
 			stage.getActor(Math.round(bullet_pos_x), 
 							Math.round(bullet_pos_y)).headTo(mouse_pos);
 			
@@ -113,7 +120,7 @@ function login(){
 		"password": $("#password").val() 
 	};
 
-        /* $.ajax({
+        $.ajax({
                 method: "POST",
                 url: "/api/auth/login",
                 data: JSON.stringify({}),
@@ -122,26 +129,34 @@ function login(){
                 contentType: "application/json; charset=utf-8",
                 dataType:"json"
         }).done(function(data, text_status, jqXHR){
-                console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); */
+                console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
 
         	$("#ui_login").hide();
-        	$("#ui_play").hide();
+        	$("#ui_play").show();
+			$("#ui_play").hide();
 			$("#ui_nav").show();
 
 		setupGame();
 		startGame();
 
-        /* }).fail(function(err){
+        }).fail(function(err){
                 console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
-        }); */
+        }); 
 }
+function register() {
+	console.log("register clicked");
+	$("#ui_login").hide();
+	$("#ui_register").show();
+	$("#registerSubmit").hide();
 
+}
 function play(){
 	$("#ui_login").hide();
 	$("#ui_play").show();
 	$("#ui_instructions").hide();
 	$("#ui_stats").hide();
 	$("#ui_profile").hide();
+
 }
 
 function instructions(){
@@ -150,6 +165,8 @@ function instructions(){
 	$("#ui_instructions").show();
 	$("#ui_stats").hide();
 	$("#ui_profile").hide();
+	pausedGame = true;
+
 }
 
 function stats(){
@@ -158,6 +175,8 @@ function stats(){
 	$("#ui_instructions").hide();
 	$("#ui_stats").show();
 	$("#ui_profile").hide();
+	pausedGame = true;
+
 }
 
 function profile(){
@@ -166,10 +185,16 @@ function profile(){
 	$("#ui_instructions").hide();
 	$("#ui_stats").hide();
 	$("#ui_profile").show();
+	pausedGame = true;
+
 }
+function createAccount() {
+	$("#ui_login").show();
+	$("#ui_register").hide();
+	$("#registerSubmit").show();
+	pausedGame = true;
 
-
-
+}
 function logout(){
 	$("#ui_nav").hide();
 	$("#ui_login").show();
@@ -177,8 +202,8 @@ function logout(){
 	$("#ui_instructions").hide();
 	$("#ui_stats").hide();
 	$("#ui_profile").hide();
+	pausedGame = true;
 }
-
 // Using the /api/auth/test route, must send authorization header
 function test(){
         $.ajax({
@@ -197,16 +222,20 @@ function test(){
 $(function(){
         // Setup all events here and display the appropriate UI
         $("#loginSubmit").on('click',function(){ login(); });
+		$("#registerSubmit").on('click',function(){ register(); });
+		$("#createUserSubmit").on('click',function(){ createAccount(); });
 		$("#playButton").on('click',function(){ play(); });
 		$("#instructionsButton").on('click',function(){ instructions(); });
 		$("#statsButton").on('click',function(){ stats(); });
 		$("#profileButton").on('click',function(){ profile(); });
 		$("#logoutButton").on('click',function(){ logout(); });
-		
-		$("#ui_nav").hide();
-        $("#ui_login").show();
+        $("#ui_nav").hide();
+		$("#ui_login").show();
+		$("#ui_register").hide();
         $("#ui_play").hide();
 		$("#ui_instructions").hide();
 		$("#ui_stats").hide();
 		$("#ui_profile").hide();
+		
 });
+
