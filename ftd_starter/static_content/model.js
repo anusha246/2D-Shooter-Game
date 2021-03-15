@@ -17,10 +17,13 @@ class Stage {
 		var radius = 18;
 		var colour= 'rgba(0,0,0,1)';
 		var position = new Pair(Math.floor(this.width/2), Math.floor(this.height/2));
+		var aim_pos = new Pair(0, 0);
+		var turret_pos = new Pair(Math.floor(this.width/2), Math.floor(this.height/2) - radius);
 		var health = 10;
 		var ammo = 10;
 		var score = 0;
-		this.addPlayer(new Player(this, position, velocity, colour, radius, health, ammo, score));
+		this.addPlayer(new Player(this, position, velocity, colour, radius, 
+									aim_pos, turret_pos, health, ammo, score));
 		
 		var num_opponents = 5;
 		for (var i=0; i<num_opponents; i++){
@@ -30,7 +33,8 @@ class Stage {
 										Math.floor((Math.random()*this.height))); 
 			
 			this.addActor(new Opponent(this, opponent_pos, velocity, colour, 
-										radius, health, ammo, score));
+										radius, aim_pos, turret_pos, health, ammo, 
+										score));
 		}
 		
 	
@@ -113,6 +117,7 @@ class Stage {
 				}
 			}
 			
+			//console.log("Step: " + stage.player.aim_pos);
 			/*
 			if (this.actors[i] == this.player) {
 				stage.player.velocity=new Pair(0, 0);
@@ -148,6 +153,8 @@ class Stage {
 			if (this.actors[i]){
 				this.actors[i].draw(context);
 			}
+			
+			//console.log("Draw: " + stage.player.aim_pos);
 		}
 	}
 
@@ -395,11 +402,12 @@ class Ball {
 
 class Player extends Ball {
 	
-	constructor(stage, position, velocity, colour, radius, health, ammo, score){
+	constructor(stage, position, velocity, colour, radius, aim_pos, turret_pos, health, ammo, score){
 		
 		super(stage, position, velocity, colour, radius);
 		
-		
+		this.aim_pos = aim_pos;
+		this.turret_pos = turret_pos;
 		this.health = health;
 		this.ammo = ammo;
 		this.score = score;
@@ -419,8 +427,21 @@ class Player extends Ball {
 		context.strokeStyle = this.colour;
 		
 		//Draw turret
+		//console.log(this.aim_pos);
+		this.turret_pos.x=(this.aim_pos.x - this.x);
+		this.turret_pos.y=(this.aim_pos.y - this.y);
+		this.turret_pos.normalize();
+		
+		this.turret_pos.x = this.turret_pos.x * this.radius + this.x;
+		this.turret_pos.y = this.turret_pos.y * this.radius + this.y;
+		//console.log(this.turret_pos);
+		
+		//this.headTo(this.aim_pos).x * this.radius + this.x;
+		//var turret_pos_y = this.headTo(this.aim_pos).y * this.radius + this.y;
+		
+		
 		context.beginPath(); 
-		context.arc(this.x, this.y - this.radius, this.radius - 8, 0, 2 * Math.PI, false); 
+		context.arc(this.turret_pos.x, this.turret_pos.y, this.radius - 8, 0, 2 * Math.PI, false); 
 		context.stroke();
 		context.fill();
 		
@@ -433,7 +454,7 @@ class Player extends Ball {
 		context.font = "15px Courier New";
 		context.fillStyle = "white";
 		context.textAlign = "center";
-		context.fillText(this.ammo, this.x, this.y - this.radius+4);   
+		context.fillText(this.ammo, this.turret_pos.x, this.turret_pos.y +4);   
 		
 		//Show player health 
 		context.font = "20px Courier New";

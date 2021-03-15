@@ -2,16 +2,19 @@ var stage=null;
 var view = null;
 var interval=null;
 var credentials={ "username": "", "password":"" };
+
 const SPEED = 3;
 function setupGame(){
 	stage=new Stage(document.getElementById('stage'));
 
 	// https://javascript.info/keyboard-events
+	//document.addEventListener('show', aimByMouse);
+	document.addEventListener('mousemove', aimByMouse);
 	document.addEventListener('click', shootByMouse);
-	document.addEventListener('keydown', actionByKey);
 	
+	document.addEventListener('keydown', actionByKey);
 	document.addEventListener('keyup', stopMoving);
-	//document.addEventListener('mousemove', aimByMouse);
+	
 	
 }
 function startGame(){
@@ -70,30 +73,42 @@ function stopMoving(event){
 
 
 function aimByMouse(event){
-	stage.angle += 10;
+	//console.log(getMousePos(event).x + " " + getMousePos(event).y);
+	stage.player.aim_pos = getMousePos(event);
 }
 
 
 function shootByMouse(event){
-	console.log(getMousePos(event).x + " " + getMousePos(event).y);
 	
-	//If paused, do not shoot
-	if (interval){
-		//If player has ammo, shoot a bullet, decrease ammo count
+	var mouse_pos = getMousePos(event);
+	console.log(mouse_pos.x + " " + mouse_pos.y);
+	console.log(stage.player.turret_pos);
+	
+	
+	
+	//If unpaused and click within canvas
+	if (interval && mouse_pos.x>=0 && mouse_pos.x<=stage.width &&
+		mouse_pos.y>=0 && mouse_pos.y<=stage.height){
+		//If player has ammo, shoot a bullet from turret, decrease ammo count
 		if (stage.player.ammo > 0){
-			stage.addActor(new Bullet(stage, new Pair(stage.player.position.x,
-										stage.player.position.y - stage.player.radius - 5), 
+			
+			var bullet_pos_x = stage.player.turret_pos.x;
+			var bullet_pos_y = stage.player.turret_pos.y + 1;
+			
+			stage.addActor(new Bullet(stage, new Pair(bullet_pos_x, bullet_pos_y), 
 										new Pair(0, 0), 'rgba(0,255,0,1)', 3, 0, "Player"));
+										
+			console.log(new Pair(bullet_pos_x, bullet_pos_y));
 		
-			stage.getActor(stage.player.position.x, 
-							stage.player.position.y - stage.player.radius - 5).headTo(getMousePos(event));
+			stage.getActor(Math.round(bullet_pos_x), 
+							Math.round(bullet_pos_y)).headTo(mouse_pos);
 			
 			stage.player.ammo--;
 		}
 	}
 	
-	//stage.addActor(new Bullet(stage, getMousePos(event), new Pair(0, 0), 'rgba(0,0,0,1)', 7));
-	//Player(stage, getMousePos(event), new Pair(0, 0), 'rgba(0,0,0,1)', 20));
+	//stage.addActor(new Bullet(stage, mouse_pos, new Pair(0, 0), 'rgba(0,0,0,1)', 7));
+	//Player(stage, mouse_pos, new Pair(0, 0), 'rgba(0,0,0,1)', 20));
 }
 
 function login(){
