@@ -14,6 +14,18 @@
 	</head>
 	<body bgcolor="ffffff">
 		<h1>f0rt9it32d</h1>
+
+		<nav id="ui_nav">
+			<ul>
+				<li> <a id="playButton" type = "submit" value = "Play">Play</a> </li>
+				<li> <a id="instructionsButton" type = "submit" value = "Instructions">Instructions</a> </li>
+				<li> <a id="statsButton" type = "submit" value = "Statistics">Statistics</a> </li>
+				<li> <a id="profileButton" type = "submit" value = "Profile">Profile</a> </li>
+				<li> <a id="logoutButton" type = "submit" value = "Logout">Logout</a> </li>
+            </ul>
+		</nav>
+		
+		
 		<div id="ui_login">
 			<div>
 				<input type="text" id="username" placeholder="User Name" />
@@ -22,9 +34,43 @@
 			</div>
 		</div>
 		<div id="ui_play">
+			<h2>Play</h2>
 			<center>
 				<canvas id="stage" width="800" height="800" style="border:1px solid black;"> </canvas>
 			</center>
+		</div>
+		<div id="ui_instructions">
+			<h2>Instructions</h2>
+			<h3>Goal</h3>
+			<p>Be the last one standing to win!
+				<br>Gain points by shooting enemies
+			</p>
+			<h3>Controls</h3>
+			<p>Move with WASD
+				<br>Press p to pause
+				<br>Aim the turret with the mouse
+				<br>Click the left mouse button to shoot
+				<br>Move into boxes to restore the ammo amount written on them, 
+				<br>but you can destroy the ammo by shooting boxes
+			</p>
+			
+		</div>
+		<div id="ui_stats">
+			<h2>Statistics</h2>
+			<p>High Score: 50
+				<br>Longest Time Alive: 10 minutes
+				<br>Enemies killed: 10
+			</p>
+		</div>
+		<div id="ui_profile">
+			<h2>Profile</h2>
+			<p>Username: CSC309
+				<br>Password: 
+				<br>Confirm Password:
+				<br>Skill: Beginner
+				<br>Birthday: 16 March 2021
+				<br>[Update button]
+			</p>
 		</div>
 	</body>
 </html>

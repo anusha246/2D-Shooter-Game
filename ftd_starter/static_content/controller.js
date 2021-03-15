@@ -81,10 +81,6 @@ function aimByMouse(event){
 function shootByMouse(event){
 	
 	var mouse_pos = getMousePos(event);
-	console.log(mouse_pos.x + " " + mouse_pos.y);
-	console.log(stage.player.turret_pos);
-	
-	
 	
 	//If unpaused and click within canvas
 	if (interval && mouse_pos.x>=0 && mouse_pos.x<=stage.width &&
@@ -97,9 +93,9 @@ function shootByMouse(event){
 			
 			stage.addActor(new Bullet(stage, new Pair(bullet_pos_x, bullet_pos_y), 
 										new Pair(0, 0), 'rgba(0,255,0,1)', 3, 0, "Player"));
-										
-			console.log(new Pair(bullet_pos_x, bullet_pos_y));
 		
+			console.log(stage.getActor(Math.round(bullet_pos_x), 
+							Math.round(bullet_pos_y)));
 			stage.getActor(Math.round(bullet_pos_x), 
 							Math.round(bullet_pos_y)).headTo(mouse_pos);
 			
@@ -129,7 +125,8 @@ function login(){
                 console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); */
 
         	$("#ui_login").hide();
-        	$("#ui_play").show();
+        	$("#ui_play").hide();
+			$("#ui_nav").show();
 
 		setupGame();
 		startGame();
@@ -137,6 +134,49 @@ function login(){
         /* }).fail(function(err){
                 console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
         }); */
+}
+
+function play(){
+	$("#ui_login").hide();
+	$("#ui_play").show();
+	$("#ui_instructions").hide();
+	$("#ui_stats").hide();
+	$("#ui_profile").hide();
+}
+
+function instructions(){
+	$("#ui_login").hide();
+	$("#ui_play").hide();
+	$("#ui_instructions").show();
+	$("#ui_stats").hide();
+	$("#ui_profile").hide();
+}
+
+function stats(){
+	$("#ui_login").hide();
+	$("#ui_play").hide();
+	$("#ui_instructions").hide();
+	$("#ui_stats").show();
+	$("#ui_profile").hide();
+}
+
+function profile(){
+	$("#ui_login").hide();
+	$("#ui_play").hide();
+	$("#ui_instructions").hide();
+	$("#ui_stats").hide();
+	$("#ui_profile").show();
+}
+
+
+
+function logout(){
+	$("#ui_nav").hide();
+	$("#ui_login").show();
+	$("#ui_play").hide();
+	$("#ui_instructions").hide();
+	$("#ui_stats").hide();
+	$("#ui_profile").hide();
 }
 
 // Using the /api/auth/test route, must send authorization header
@@ -157,7 +197,16 @@ function test(){
 $(function(){
         // Setup all events here and display the appropriate UI
         $("#loginSubmit").on('click',function(){ login(); });
+		$("#playButton").on('click',function(){ play(); });
+		$("#instructionsButton").on('click',function(){ instructions(); });
+		$("#statsButton").on('click',function(){ stats(); });
+		$("#profileButton").on('click',function(){ profile(); });
+		$("#logoutButton").on('click',function(){ logout(); });
+		
+		$("#ui_nav").hide();
         $("#ui_login").show();
         $("#ui_play").hide();
+		$("#ui_instructions").hide();
+		$("#ui_stats").hide();
+		$("#ui_profile").hide();
 });
-

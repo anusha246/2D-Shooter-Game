@@ -12,22 +12,20 @@ class Stage {
 		this.width=canvas.width;
 		this.height=canvas.height;
 
-		// Add the player to the center of the stage
+		// Add opponents, player to the center of the stage
 		var velocity = new Pair(0,0);
 		var radius = 18;
-		var colour= 'rgba(0,0,0,1)';
+		var colour= 'rgba(255,0,0,1)';
 		var position = new Pair(Math.floor(this.width/2), Math.floor(this.height/2));
-		var aim_pos = new Pair(0, 0);
+		var aim_pos = new Pair(Math.floor(this.width/2), Math.floor(this.height/2));
 		var turret_pos = new Pair(Math.floor(this.width/2), Math.floor(this.height/2) - radius);
 		var health = 10;
 		var ammo = 10;
 		var score = 0;
-		this.addPlayer(new Player(this, position, velocity, colour, radius, 
-									aim_pos, turret_pos, health, ammo, score));
 		
 		var num_opponents = 5;
 		for (var i=0; i<num_opponents; i++){
-			var colour= 'rgba(255,0,0,1)';
+			
 			
 			var opponent_pos = new Pair(Math.floor((Math.random()*this.width)), 
 										Math.floor((Math.random()*this.height))); 
@@ -36,6 +34,12 @@ class Stage {
 										radius, aim_pos, turret_pos, health, ammo, 
 										score));
 		}
+		
+		var colour= 'rgba(0,0,0,1)';
+		this.addPlayer(new Player(this, position, velocity, colour, radius, 
+									aim_pos, turret_pos, health, ammo, score));
+		
+		
 		
 	
 		// Add in some Balls
@@ -217,7 +221,7 @@ class Box {
 		context.font = "15px Courier New";
 		context.fillStyle = "black";
 		context.textAlign = "center";
-		context.fillText(this.health, this.x+this.width/2, this.y+this.height/2);
+		context.fillText(this.health, this.x+this.width/2, this.y+this.height/2+4);
 	}
 }
 
@@ -436,9 +440,6 @@ class Player extends Ball {
 		this.turret_pos.y = this.turret_pos.y * this.radius + this.y;
 		//console.log(this.turret_pos);
 		
-		//this.headTo(this.aim_pos).x * this.radius + this.x;
-		//var turret_pos_y = this.headTo(this.aim_pos).y * this.radius + this.y;
-		
 		
 		context.beginPath(); 
 		context.arc(this.turret_pos.x, this.turret_pos.y, this.radius - 8, 0, 2 * Math.PI, false); 
@@ -483,8 +484,16 @@ class Opponent extends Player {
 		context.strokeStyle = this.colour;
 		
 		//Draw turret
+		//console.log(this.aim_pos);
+		this.turret_pos.x=(this.aim_pos.x - this.x);
+		this.turret_pos.y=(this.aim_pos.y - this.y);
+		this.turret_pos.normalize();
+		
+		this.turret_pos.x = this.turret_pos.x * this.radius + this.x;
+		this.turret_pos.y = this.turret_pos.y * this.radius + this.y;
+		
 		context.beginPath(); 
-		context.arc(this.x, this.y - this.radius, this.radius - 8, 0, 2 * Math.PI, false); 
+		context.arc(this.turret_pos.x, this.turret_pos.y, this.radius - 8, 0, 2 * Math.PI, false); 
 		context.stroke();
 		context.fill();
 		
@@ -497,7 +506,7 @@ class Opponent extends Player {
 		context.font = "15px Courier New";
 		context.fillStyle = "white";
 		context.textAlign = "center";
-		context.fillText(this.ammo, this.x, this.y - this.radius+4);
+		context.fillText(this.ammo, this.turret_pos.x, this.turret_pos.y+4);
 		
 		//Show health 
 		context.font = "20px Courier New";
@@ -531,5 +540,4 @@ class Bullet extends Ball {
 	}
 	
 }
-
 
