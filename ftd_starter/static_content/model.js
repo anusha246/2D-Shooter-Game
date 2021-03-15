@@ -167,6 +167,21 @@ class Stage {
 		}
 		return null;
 	}
+
+	pauseGame(pausedGame) {
+		if (pausedGame) {
+			console.log('here');
+			var context = this.canvas.getContext('2d');
+			context.fillStyle = 'rgba(0,0,0,0.5)';
+			context.fillRect(0, 0, stage.width, stage.height);
+			
+			context.font = "30px Courier New";
+			context.fillStyle = "white";
+			context.textAlign = "center";
+			context.fillText("Paused", stage.width/2, stage.height/2);
+			context.fillText("Press 'p' to resume", stage.width/2, stage.height/2 + 30);
+		}
+	}
 	
 	
 
@@ -398,6 +413,7 @@ class Ball {
 		context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false); 
 		context.fill();   
 	}
+	
 }
 
 class Player extends Ball {
