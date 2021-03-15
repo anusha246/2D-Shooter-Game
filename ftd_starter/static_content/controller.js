@@ -117,7 +117,7 @@ function login(){
 		"password": $("#password").val() 
 	};
 
-        /* $.ajax({
+        $.ajax({
                 method: "POST",
                 url: "/api/auth/login",
                 data: JSON.stringify({}),
@@ -126,7 +126,7 @@ function login(){
                 contentType: "application/json; charset=utf-8",
                 dataType:"json"
         }).done(function(data, text_status, jqXHR){
-                console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); */
+                console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
 
         	$("#ui_login").hide();
         	$("#ui_play").show();
@@ -134,11 +134,21 @@ function login(){
 		setupGame();
 		startGame();
 
-        /* }).fail(function(err){
+        }).fail(function(err){
                 console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
-        }); */
+        }); 
 }
-
+function register() {
+	console.log("register clicked");
+	$("#ui_login").hide();
+	$("#ui_register").show();
+	$("#registerSubmit").hide();
+}
+function createAccount() {
+	$("#ui_login").show();
+	$("#ui_register").hide();
+	$("#registerSubmit").show();
+}
 // Using the /api/auth/test route, must send authorization header
 function test(){
         $.ajax({
@@ -157,7 +167,10 @@ function test(){
 $(function(){
         // Setup all events here and display the appropriate UI
         $("#loginSubmit").on('click',function(){ login(); });
+		$("#registerSubmit").on('click',function(){ register(); });
+		$("#createUserSubmit").on('click',function(){ createAccount(); });
         $("#ui_login").show();
+		$("#ui_register").hide();
         $("#ui_play").hide();
 });
 

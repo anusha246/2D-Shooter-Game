@@ -6,6 +6,7 @@
 		<script src="jquery-3.5.1.min.js"></script>
 		<script language="javascript" src="model.js" > </script>
 		<script language="javascript" src="controller.js" > </script>
+		<link rel="stylesheet" type="text/css" href="style.css" />
 		<style>
 			#ui_login { display:block; }
 			#ui_play { display:none; }
@@ -20,6 +21,24 @@
 				<input type="password" id="password" placeholder="Password" />
 				<input type="submit" id="loginSubmit" value="Login">
 			</div>
+			<a type = "submit" id = "registerSubmit" value = "Register"> Register </a>
+		</div>
+		<div id="ui_register">
+			<div>
+				<input type="text" id="createUsername" placeholder="Username" required> <!-- user name -->
+			</div>
+			<div>
+				<input type="password" id="createPassword" placeholder="Password" required> <!-- password -->
+			</div>
+			<div>
+				<div>
+					<input type="text" id="createFirstName" placeholder="First Name" required> <!-- first name -->
+				</div>
+				<div>
+					<input type="text" id="createLastName" placeholder="Last Name" required> <!-- last name -->
+				</div>
+			</div>
+			<a type = "submit" id = "createUserSubmit" value = "Registered"> Create Account </a>
 		</div>
 		<div id="ui_play">
 			<center>

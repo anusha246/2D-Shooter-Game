@@ -1,8 +1,8 @@
 {
-  "name": "ftd",
+  "name": "ftd_starter",
   "version": "1.0.0",
   "description": "",
-  "main": "ftd.js",
+  "main": "authorization.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
