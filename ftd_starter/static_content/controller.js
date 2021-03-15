@@ -51,7 +51,6 @@ function getMousePos(event) {
 					(event.clientX - rect.left) / (rect.right - rect.left) * stage.canvas.width,
 					(event.clientY - rect.top) / (rect.bottom - rect.top) * stage.canvas.height);
 }
-
 function actionByKey(event){
 
 	var key = event.key;
