@@ -52,32 +52,10 @@ class Stage {
 		
 		
 	
-		// Add in some Balls
-		var total=20;
-		while(total>0){
-			var x=Math.floor((Math.random()*(this.width-200))); 
-			var y=Math.floor((Math.random()*(this.height-200))); 
-			if(this.getActor(x,y)===null){
-				//var velocity = new Pair(rand(20), rand(20));
-	
-				var red=randint(255), green=randint(255), blue=randint(255);
-				
-				//Random integers in range code below from
-				//https://stackoverflow.com/questions/1527803/generating-random-whole-numbers-in-javascript-in-a-specific-range
-				var width = Math.floor(Math.random() * (200 - 5 + 1)) + 5;
-				var height = Math.floor(Math.random() * (200 - 5 + 1)) + 5;
-				
-				//var alpha = Math.random();
-				var colour= 'rgba('+red+','+green+','+blue+','+0.75+')';
-				var position = new Pair(x,y);
-				var health = 3;
-				
-				//var b = new Ball(this, position, velocity, colour, radius);
-				var b = new Box(this, position, colour, width, height, health);
-				this.addActor(b);
-				total--;
-			}
-		}
+		// Add in some Boxes
+		this.numBoxes=20;
+		this.generateBoxes(this.numBoxes);
+		
 	}
 
 	addPlayer(player){
@@ -161,26 +139,21 @@ class Stage {
 				}
 			}
 			
+			if (!this.actors.some(Object => Object.constructor.name == "Box")){
+						
+				this.generateBoxes(this.numBoxes);
+			} 
+			
 			if (this.player == null || 
 				!this.actors.some(Object => Object.constructor.name == "Opponent")){
 						
 				this.isGameDone = true;
-					
+				break;
 			} 
 			
-			/*
-			if (this.actors[i].constructor.name == "Opponent"){
-					this.actors[i].attack();
-			}
-			*/
 			
-			//console.log("Step: " + stage.player.aim_pos);
-			/*
-			if (this.actors[i] == this.player) {
-				stage.player.velocity=new Pair(0, 0);
-			}
-			*/
 		}
+		
 	}
 
 	draw(){
@@ -239,6 +212,33 @@ class Stage {
 			}
 		}
 		return null;
+	}
+	
+	generateBoxes(numBoxes){
+		while(numBoxes>0){
+			var x=Math.floor((Math.random()*(this.width-200))); 
+			var y=Math.floor((Math.random()*(this.height-200))); 
+			if(this.getActor(x,y)===null){
+				//var velocity = new Pair(rand(20), rand(20));
+	
+				var red=randint(255), green=randint(255), blue=randint(255);
+				
+				//Random integers in range code below from
+				//https://stackoverflow.com/questions/1527803/generating-random-whole-numbers-in-javascript-in-a-specific-range
+				var width = Math.floor(Math.random() * (200 - 5 + 1)) + 5;
+				var height = Math.floor(Math.random() * (200 - 5 + 1)) + 5;
+				
+				//var alpha = Math.random();
+				var colour= 'rgba('+red+','+green+','+blue+','+0.75+')';
+				var position = new Pair(x,y);
+				var health = 3;
+				
+				//var b = new Ball(this, position, velocity, colour, radius);
+				var b = new Box(this, position, colour, width, height, health);
+				this.addActor(b);
+				numBoxes--;
+			}
+		}
 	}
 	
 	
