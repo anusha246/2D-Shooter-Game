@@ -24,12 +24,17 @@ function startGame(){
 function animate() {
 	stage.step();
 	stage.draw();
-	if (pausedGame) { pauseGame(); }
-	else { 	requestAnimationFrame(animate);	}
+	if (pausedGame) { 
+		pauseGame(); 
+	} else if (!stage.isGameDone){
+		requestAnimationFrame(animate);	
+	}
 }
 function pauseGame(){
-	console.log('here');
+	//console.log('here');
 	//stage.pauseGame(pausedGame);
+	
+	
 	var context = stage.canvas.getContext('2d');
 	context.fillStyle = 'rgba(0,0,0,0.5)';
 	context.fillRect(0, 0, stage.width, stage.height);
@@ -39,6 +44,7 @@ function pauseGame(){
 	context.textAlign = "center";
 	context.fillText("Paused", stage.width/2, stage.height/2);
 	context.fillText("Press 'p' to resume", stage.width/2, stage.height/2 + 30);
+	
 	
 }
 
@@ -59,39 +65,47 @@ function actionByKey(event){
 		'd': new Pair(SPEED,0),
 		'w': new Pair(0,-SPEED)
 	};
-	if(key in moveMap){
-		stage.player.velocity=moveMap[key];
-	} else if (key=='p'){
-		pausedGame = (!pausedGame);
-		if (pausedGame != false){
-			pauseGame();
-		} else {
-			startGame();
+	
+	if(!stage.isGameDone){
+		if(key in moveMap){
+			stage.player.velocity=moveMap[key];
+		} else if (key=='p'){
+			pausedGame = (!pausedGame);
+			if (pausedGame != false){
+				pauseGame();
+			} else {
+				startGame();
+			}
 		}
 	}
 		
 }
 
 function stopMoving(event){
-	stage.player.velocity=new Pair(0,0);
+	if(!stage.isGameDone){
+		stage.player.velocity=new Pair(0,0);
+	}
 }
 
 function aimByMouse(event){
 	//console.log(getMousePos(event).x + " " + getMousePos(event).y);
-	stage.player.aim_pos = getMousePos(event);
+	if(!stage.isGameDone){
+		stage.player.aim_pos = getMousePos(event);
+	}
 }
 
 function shootByMouse(event){
 	
 	var mouse_pos = getMousePos(event);
 	console.log(mouse_pos.x + " " + mouse_pos.y);
-	console.log(stage.player.turret_pos);
-	console.log("bye");
+	//console.log(stage.player.turret_pos);
+	//console.log("bye");
 
-	//If unpaused and click within canvas
-	if (mouse_pos.x>=0 && mouse_pos.x<=stage.width &&
+	//If game not done and unpaused and click within canvas
+	if (!stage.isGameDone && !pausedGame && 
+		mouse_pos.x>=0 && mouse_pos.x<=stage.width &&
 		mouse_pos.y>=0 && mouse_pos.y<=stage.height){
-		console.log("hi");
+		//console.log("hi");
 		//If player has ammo, shoot a bullet from turret, decrease ammo count
 		if (stage.player.ammo > 0){
 			
@@ -101,7 +115,7 @@ function shootByMouse(event){
 			stage.addActor(new Bullet(stage, new Pair(bullet_pos_x, bullet_pos_y), 
 										new Pair(0, 0), 'rgba(0,255,0,1)', 3, 0, "Player"));
 										
-			console.log(new Pair(bullet_pos_x, bullet_pos_y));
+			//console.log(new Pair(bullet_pos_x, bullet_pos_y));
 		
 			stage.getActor(Math.round(bullet_pos_x), 
 							Math.round(bullet_pos_y)).headTo(mouse_pos);
@@ -119,7 +133,7 @@ function login(){
 		"username": $("#username").val(), 
 		"password": $("#password").val() 
 	};
-
+		/*
         $.ajax({
                 method: "POST",
                 url: "/api/auth/login",
@@ -130,6 +144,7 @@ function login(){
                 dataType:"json"
         }).done(function(data, text_status, jqXHR){
                 console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+		*/
 
         	$("#ui_login").hide();
         	$("#ui_play").show();
@@ -138,13 +153,16 @@ function login(){
 
 		setupGame();
 		startGame();
+		pausedGame = true;
 
+		/*
         }).fail(function(err){
                 console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
         }); 
+		*/
 }
 function register() {
-	console.log("register clicked");
+	//console.log("register clicked");
 	$("#ui_login").hide();
 	$("#ui_register").show();
 	$("#registerSubmit").hide();

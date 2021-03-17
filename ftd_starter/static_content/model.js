@@ -7,35 +7,45 @@ class Stage {
 	
 		this.actors=[]; // all actors on this stage (monsters, player, boxes, ...)
 		this.player=null; // a special actor, the player
+		this.isGameDone = false;
 	
 		// the logical width and height of the stage
 		this.width=canvas.width;
 		this.height=canvas.height;
 
-		// Add opponents, player to the center of the stage
+		//Starter values for both player and opponents
 		var velocity = new Pair(0,0);
 		var radius = 18;
-		var colour= 'rgba(255,0,0,1)';
-		var position = new Pair(Math.floor(this.width/2), Math.floor(this.height/2));
 		var aim_pos = new Pair(Math.floor(this.width/2), Math.floor(this.height/2));
 		var turret_pos = new Pair(Math.floor(this.width/2), Math.floor(this.height/2) - radius);
 		var health = 10;
 		var ammo = 10;
-		var score = 0;
 		
-		var num_opponents = 5;
+		
+		//Create opponents
+		var num_opponents = 3;
 		for (var i=0; i<num_opponents; i++){
 			
-			
+			var colour= 'rgba(255,0,0,1)';
 			var opponent_pos = new Pair(Math.floor((Math.random()*this.width)), 
-										Math.floor((Math.random()*this.height))); 
+										Math.floor((Math.random()*this.height)));
+										
+			//Random integers in range code below from
+			//https://stackoverflow.com/questions/1527803/generating-random-whole-numbers-in-javascript-in-a-specific-range
+			//Set move_time a random int between 1 and 200
+			var move_time = Math.floor(Math.random() * (200 - 1 + 1)) + 1;
 			
 			this.addActor(new Opponent(this, opponent_pos, velocity, colour, 
 										radius, aim_pos, turret_pos, health, ammo, 
-										score));
+										move_time));
 		}
 		
+		//Create player
+		var score = 0;
+		var position = new Pair(Math.floor(this.width/2), Math.floor(this.height/2));
 		var colour= 'rgba(0,0,0,1)';
+		
+		this.score = score;
 		this.addPlayer(new Player(this, position, velocity, colour, radius, 
 									aim_pos, turret_pos, health, ammo, score));
 		
@@ -102,39 +112,31 @@ class Stage {
 				var shouldStep = true;
 				for(var j=0;j<this.actors.length;j++){
 					
+					//If the player is dead or all opponents are dead
+					//or object is colliding with something else
 					if (!this.actors[i].shouldStep(this.actors[j])){
+							
 						shouldStep = false;
 						if (this.actors[i].constructor.name == "Bullet" &&
 							this.actors[j].constructor.name != "Box" &&
 							this.actors[i].type != this.actors[j].constructor.name){
 							
-							if (this.actors[i].type == "Player") {
+							if (this.player && this.actors[i].type == "Player") {
 								this.player.score++;
 							}
 						}
 						break;
 					}
 				}
-					
+				
 				if(shouldStep){
 					this.actors[i].step();
-				}
+				} 
+					
+						
+				
 			}
 			
-			//console.log("Step: " + stage.player.aim_pos);
-			/*
-			if (this.actors[i] == this.player) {
-				stage.player.velocity=new Pair(0, 0);
-			}
-			*/
-		}
-	}
-
-	draw(){
-		var context = this.canvas.getContext('2d');
-		context.clearRect(0, 0, this.width, this.height);
-		for(var i=0;i<this.actors.length;i++){
-
 			//If Bullet, increase time by 1
 			if ((this.actors[i].constructor.name) == "Bullet"){
 				this.actors[i].time += 1;
@@ -149,17 +151,84 @@ class Stage {
 			//If actor exists and has health, remove it if health is 0
 			if (this.actors[i] && typeof this.actors[i].health == 'number'){
 				if (this.actors[i].health <= 0){
-					this.removeActor(this.actors[i]);
+					this.score = this.player.score;
+					
+					if (this.actors[i] == this.player){
+						this.removePlayer(this.actors[i]);
+					} else {
+						this.removeActor(this.actors[i]);
+					}
 				}
 			}
 			
-			//If actor exists, draw it
-			if (this.actors[i]){
-				this.actors[i].draw(context);
+			if (this.player == null || 
+				!this.actors.some(Object => Object.constructor.name == "Opponent")){
+						
+				this.isGameDone = true;
+					
+			} 
+			
+			/*
+			if (this.actors[i].constructor.name == "Opponent"){
+					this.actors[i].attack();
 			}
+			*/
+			
+			//console.log("Step: " + stage.player.aim_pos);
+			/*
+			if (this.actors[i] == this.player) {
+				stage.player.velocity=new Pair(0, 0);
+			}
+			*/
+		}
+	}
+
+	draw(){
+		var context = this.canvas.getContext('2d');
+		
+		if (this.isGameDone){
+			context.fillStyle = 'rgba(0,0,0,0.5)';
+			context.fillRect(0, 0, stage.width, stage.height);
+			
+			context.font = "30px Courier New";
+			context.fillStyle = "white";
+			context.textAlign = "center";
+			
+			if (this.player == null){
+				context.fillText("Game Over", stage.width/2, stage.height/2);
+				context.fillText("Your score is " + this.score, 
+									stage.width/2, stage.height/2 + 30);
+									
+			//All opponents are dead
+			} else {
+				var bonus = 5;
+				this.score += bonus;
+				
+				context.fillText("You Won!", stage.width/2, stage.height/2);
+				context.fillText("The win bonus is " + bonus, 
+									stage.width/2, stage.height/2 + 30);
+				context.fillText("Your score is " + this.score, 
+									stage.width/2, stage.height/2 + 60);
+			}
+				
+				
+		} else {
+			context.clearRect(0, 0, this.width, this.height);
+			for(var i=0;i<this.actors.length;i++){
+
+				//If actor exists, draw it
+				if (this.actors[i]){
+					this.actors[i].draw(context);
+				}
+			
+		
 			
 			//console.log("Draw: " + stage.player.aim_pos);
+			}
 		}
+		
+		
+		
 	}
 
 	// return the first actor at coordinates (x,y) return null if there is no such actor
@@ -431,14 +500,12 @@ class Player extends Ball {
 		context.strokeStyle = this.colour;
 		
 		//Draw turret
-		//console.log(this.aim_pos);
 		this.turret_pos.x=(this.aim_pos.x - this.x);
 		this.turret_pos.y=(this.aim_pos.y - this.y);
 		this.turret_pos.normalize();
 		
 		this.turret_pos.x = this.turret_pos.x * this.radius + this.x;
 		this.turret_pos.y = this.turret_pos.y * this.radius + this.y;
-		//console.log(this.turret_pos);
 		
 		
 		context.beginPath(); 
@@ -476,7 +543,64 @@ class Player extends Ball {
 	
 }
 
-class Opponent extends Player {
+class Opponent extends Ball {
+	
+	constructor(stage, position, velocity, colour, radius, aim_pos, 
+				turret_pos, health, ammo, move_time){
+				
+		super(stage, position, velocity, colour, radius);
+		
+		this.aim_pos = aim_pos;
+		this.turret_pos = turret_pos;
+		this.health = health;
+		this.ammo = ammo;
+		
+		this.move_time = move_time;
+	}
+	
+	attack(){
+		
+		this.aim_pos = this.stage.player.position;
+		this.move_time--;
+		
+		if (this.move_time <= 0){
+			
+			//Set a new move_time between 100 and 200
+			this.move_time = Math.floor(Math.random() * (200 - 100 + 1)) + 100;
+			
+			var new_x_vel = Math.floor(Math.random() * (2 - (-2) + 1)) + (-2);
+			var new_y_vel = Math.floor(Math.random() * (2 - (-2) + 1)) + (-2);
+			
+			this.velocity = new Pair(new_x_vel, new_y_vel);
+		}
+		
+		
+		
+		if (Math.floor(Math.random()*200) == 0){
+			//If opponent has ammo, shoot a bullet from turret, decrease ammo count
+			if (this.ammo > 0){
+				
+				var bullet_pos_x = this.turret_pos.x;
+				var bullet_pos_y = this.turret_pos.y + 1;
+				
+				this.stage.addActor(new Bullet(this.stage, new Pair(bullet_pos_x, bullet_pos_y), 
+											new Pair(0, 0), 'rgba(255,0,0,1)', 3, 0, 
+											"Opponent"));
+											
+			
+				this.stage.getActor(Math.round(bullet_pos_x), 
+								Math.round(bullet_pos_y)).headTo(this.stage.player.position);
+				
+				this.ammo--;
+				
+			}
+		}
+		
+		
+		
+		
+	}
+	
 	draw(context){
 		
 		//Set stroke, fill colors
@@ -485,6 +609,7 @@ class Opponent extends Player {
 		
 		//Draw turret
 		//console.log(this.aim_pos);
+		
 		this.turret_pos.x=(this.aim_pos.x - this.x);
 		this.turret_pos.y=(this.aim_pos.y - this.y);
 		this.turret_pos.normalize();
@@ -492,6 +617,7 @@ class Opponent extends Player {
 		this.turret_pos.x = this.turret_pos.x * this.radius + this.x;
 		this.turret_pos.y = this.turret_pos.y * this.radius + this.y;
 		
+		this.attack();
 		context.beginPath(); 
 		context.arc(this.turret_pos.x, this.turret_pos.y, this.radius - 8, 0, 2 * Math.PI, false); 
 		context.stroke();
@@ -513,6 +639,8 @@ class Opponent extends Player {
 		context.fillStyle = "black";
 		context.textAlign = "center";
 		context.fillText(this.health, this.x, this.y+6);
+		
+		
 		
 	}
 	
