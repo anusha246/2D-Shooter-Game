@@ -4,6 +4,7 @@ var interval=null;
 var credentials={ "username": "", "password":"" };
 var pausedGame = false;
 const SPEED = 3;
+var loggedIn = false;
 
 function setupGame(){
 	stage=new Stage(document.getElementById('stage'));
@@ -154,14 +155,17 @@ function login(){
         	$("#ui_play").show();
 			$("#ui_play").hide();
 			$("#ui_nav").show();
+			loggedIn = true;
 			setupGame();
 			startGame();
 
         }).fail(function(err){
-                console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+            console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
         }); 	
+
 }
 function register() {
+
 	//console.log("register clicked");
 	$("#ui_login").hide();
 	$("#ui_register").show();
@@ -170,204 +174,76 @@ function register() {
 }
 function createAccount() {
 
+	if (loggedIn) {
+		$("#ui_login").show();
+		$("#ui_play").hide();
+		$("#ui_instructions").hide();
+		$("#ui_stats").hide();
+		$("#ui_profile").hide();
+		$('#ui_register').hide();
+		$("#registerSubmit").show();
+	}	
 
-	credentials =  { 
-		"username": $("#createUsername").val(), 
-		"password": $("#createPassword").val() 
-	};
-	console.log(credentials);
-		
-        $.ajax({
-                method: "POST",
-                url: "/api/register",
-                data: JSON.stringify({}),
-				headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
-				"Password" : btoa(credentials.password) },
-                processData:false,
-                contentType: "application/json; charset=utf-8",
-                dataType:"json"
-        }).done(function(data, text_status, jqXHR){
-                console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
-		
-				$("#ui_login").show();
-				$("#ui_play").hide();
-				$("#ui_instructions").hide();
-				$("#ui_stats").hide();
-				$("#ui_profile").hide();
-				$('#ui_register').hide();
-				$("#registerSubmit").show();
-
-
-		
-        }).fail(function(err){
-                console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
-        }); 	
 }
 function play(){
-	credentials =  { 
-		"username": $("#username").val(), 
-		"password": $("#password").val() 
-	};
-	console.log(credentials);
 
-	$.ajax({
-		method: "POST",
-		url: "/api/auth/login",
-		data: JSON.stringify({}),
-		headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
-		"Password" : btoa(credentials.password) },
-		processData:false,
-		contentType: "application/json; charset=utf-8",
-		dataType:"json"
-	}).done(function(data, text_status, jqXHR){
-		console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
-
+	if (loggedIn) {
 		$("#ui_login").hide();
 		$("#ui_play").show();
 		$("#ui_instructions").hide();
 		$("#ui_stats").hide();
 		$("#ui_profile").hide();
-
-
-	}).fail(function(err){
-		console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
-	}); 
+	}
+	
 }
 
 function instructions(){
 
-	credentials =  { 
-		"username": $("#username").val(), 
-		"password": $("#password").val() 
-	};
-	console.log(credentials);
-
-	$.ajax({
-
-		method: "POST",
-		url: "/api/auth/login",
-		data: JSON.stringify({}),
-		headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
-		"Password" : btoa(credentials.password) },
-		processData:false,
-		contentType: "application/json; charset=utf-8",
-		dataType:"json"
-
-	}).done(function(data, text_status, jqXHR){
-
-		console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+	if (loggedIn) {
 		$("#ui_login").hide();
 		$("#ui_play").hide();
 		$("#ui_instructions").show();
 		$("#ui_stats").hide();
 		$("#ui_profile").hide();
 		pausedGame = true;
+	}
 
-	}).fail(function(err){
-		console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
-	}); 
 }
 
 function stats(){
 
-	credentials =  { 
-		"username": $("#username").val(), 
-		"password": $("#password").val() 
-	};
-	console.log(credentials);
-
-	$.ajax({
-
-		method: "POST",
-		url: "/api/auth/login",
-		data: JSON.stringify({}),
-		headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
-		"Password" : btoa(credentials.password) },
-		processData:false,
-		contentType: "application/json; charset=utf-8",
-		dataType:"json"
-
-	}).done(function(data, text_status, jqXHR){
-
-		console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+	if (loggedIn) {
 		$("#ui_login").hide();
 		$("#ui_play").hide();
 		$("#ui_instructions").hide();
 		$("#ui_stats").show();
 		$("#ui_profile").hide();
 		pausedGame = true;
+	}
 
-	}).fail(function(err){
-		console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
-	}); 
 }
-
 function profile(){
 
-	credentials =  { 
-		"username": $("#username").val(), 
-		"password": $("#password").val() 
-	};
-	console.log(credentials);
-
-	$.ajax({
-
-		method: "POST",
-		url: "/api/auth/login",
-		data: JSON.stringify({}),
-		headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
-		"Password" : btoa(credentials.password) },
-		processData:false,
-		contentType: "application/json; charset=utf-8",
-		dataType:"json"
-
-	}).done(function(data, text_status, jqXHR){
-
-		console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+	if (loggedIn) {
 		$("#ui_login").hide();
 		$("#ui_play").hide();
 		$("#ui_instructions").hide();
 		$("#ui_stats").hide();
 		$("#ui_profile").show();
 		pausedGame = true;
-
-	}).fail(function(err){
-		console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
-	}); 
-
+	} 
 
 }
 function logout(){
 
-	credentials =  { 
-		"username": $("#username").val(), 
-		"password": $("#password").val() 
-	};
-	console.log(credentials);
+	$("#ui_nav").hide();
+	$("#ui_login").show();
+	$("#ui_play").hide();
+	$("#ui_instructions").hide();
+	$("#ui_stats").hide();
+	$("#ui_profile").hide();
+	loggedIn = false;
 
-	$.ajax({
-		method: "POST",
-		url: "/api/auth/login",
-		data: JSON.stringify({}),
-		headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
-		"Password" : btoa(credentials.password) },
-		processData:false,
-		contentType: "application/json; charset=utf-8",
-		dataType:"json"
-	}).done(function(data, text_status, jqXHR){
-
-		console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
-		$("#ui_nav").hide();
-		$("#ui_login").show();
-		$("#ui_play").hide();
-		$("#ui_instructions").hide();
-		$("#ui_stats").hide();
-		$("#ui_profile").hide();
-		pausedGame = true;
-
-	}).fail(function(err){
-		console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
-	}); 
 }
 // Using the /api/auth/test route, must send authorization header
 function test(){
