@@ -55,12 +55,8 @@ app.use('/api/auth/login', function (req, res,next) {
 		p = /(([\w]|[\W])*)$/.exec(pword) //Alphabet, digits, and any special character
 
 		console.log(u)
-
 		//m = /^(.*):(.*)$/.exec(user_pass); // probably should do better than this
-		
 		console.log(u)
-
-		
 		console.log(p)
 		
 		var username = u[1];
@@ -86,30 +82,66 @@ app.use('/api/auth/login', function (req, res,next) {
 app.use('/api/register', function (req, res,next) {
 	console.log("ahhh");
 
-	if (!req.headers.authorization) {
-		return res.status(403).json({ error: 'No credentials sent!' });
+	if (!req.headers.username || !req.headers.password || 
+		!req.headers.email || !req.headers.firstname || !req.headers.lastname) {
+		return res.status(403).json({ error: 'Please fill out all fields' });
   	}
 	try {
-		// var credentialsString = Buffer.from(req.headers.authorization.split(" ")[1], 'base64').toString();
-		var m = /^Basic\s+(.*)$/.exec(req.headers.authorization);
+		//Regex match ALL FIELDS to be valid
+		//That is, usernames are only digits and alphabet letters with two exceptions, dots and underscore.  
+		var u = /(([\w]|[\W])*)$/.exec(req.headers.username);
+		var uname = Buffer.from(u[1], 'base64').toString()
+		u = /(([\w]|[\.])*){1,20}$/.exec(uname) //Only A-Z, a-z, 0-9, the underscore, and a dot
 
-		var user_pass = Buffer.from(m[1], 'base64').toString()
-		m = /^(.*):(.*)$/.exec(user_pass); // probably should do better than this
+		//Passwords are special characters & letters.
+		var p = /(([\w]|[\W])*)$/.exec(req.headers.password);
+		var pword = Buffer.from(p[1], 'base64').toString()
+		p = /(([\w]|[\W])*)$/.exec(pword) //Alphabet, digits, and any special character
 
-		var username = m[1];
-		var password = m[2];
+		//Emails are digits & letters.
+		var e = /(([\w]|[\W])*)$/.exec(req.headers.email);
+		var mail = Buffer.from(e[1], 'base64').toString()
+		//Only letters, 0-9, hyphen, period, underscore, plus, and @ sign
+		e = /(([\w]|[\.]|[\+]|[\-])*@([\w]|[\.]|[\+]|[\-])*)$/.exec(mail) 
 
-		console.log(username+" "+password);
+		//First names are only alphabet characters
+		var f = /(([\w]|[\W])*)$/.exec(req.headers.firstname);
+		var fname = Buffer.from(f[1], 'base64').toString()
+		console.log(fname)
+		f = /(([A-Z]|[a-z])*)$/.exec(fname) //Only A-Z, a-z
 
-		let sql_check = 'SELECT * FROM ftduser WHERE username=$1 and password=sha512($2)';
-        	pool.query(sql_check, [username, password], (err, pgRes) => {
+		//Last names are only alphabet characters
+		var l = /(([\w]|[\W])*)$/.exec(req.headers.lastname);
+		var lname = Buffer.from(l[1], 'base64').toString()
+		l = /([A-Za-z]*)$/.exec(lname) //Only A-Z, a-z
+
+		console.log(u);
+		console.log(p);
+		console.log(e);
+		console.log(f);
+		console.log(l);
+
+		
+		//m = /^(.*):(.*)$/.exec(user_pass); // probably should do better than this
+
+		var username = u[1];
+		var password = p[1];
+		var email = e[1];
+		var firstname = f[1];
+		var lastname = l[1];
+
+		console.log(username+" "+password+" "+email+" "+firstname+" "+lastname);
+
+		let sql_check = 'SELECT * FROM ftduser WHERE username=$1';
+        	pool.query(sql_check, [username], (err, pgRes) => {
   			if (err){
                 res.status(403).json({ error: 'Please enter a valid username and password'});
-			} else if(pgRes.rowCount == 1){
-				res.status(403).json({ error: 'User already exists!'});
+			} else if(pgRes.rowCount >= 1){
+				res.status(403).json({ error: 'User already exists. Please enter a unique username.'});
 			} else {
-				let sql_insert = 'INSERT INTO ftduser (username, password) VALUES ($1, sha512($2))';
-				pool.query(sql_insert, [username, password], (err));
+				let sql_insert = 'INSERT INTO ftduser (username, password, email, firstname, lastname) \
+				VALUES ($1, sha512($2), $3, $4, $5)';
+				pool.query(sql_insert, [username, password, email, firstname, lastname], (err));
 				next(); 	
         	}
 		});

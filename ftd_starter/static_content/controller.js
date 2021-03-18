@@ -167,7 +167,6 @@ function login(){
 			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
         	$("#ui_login").hide();
         	$("#ui_play").show();
-			$("#ui_play").hide();
 			$("#ui_nav").show();
 			loggedIn = true;
 			setupGame();
@@ -188,7 +187,30 @@ function register() {
 }
 function createAccount() {
 
-	if (loggedIn) {
+	credentials =  { 
+		"username": $("#createUsername").val(), 
+		"password": $("#createPassword").val(),
+		"email": $("#createEmail").val(),
+		"firstname": $("#createFirstName").val(),
+		"lastname": $("#createLastName").val() 
+	};
+		
+	$.ajax({
+
+		method: "POST",
+		url: "/api/register",
+		data: JSON.stringify({}),
+		headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
+		"Password" : btoa(credentials.password), "Email" : btoa(credentials.email),
+		"FirstName" : btoa(credentials.firstname), "LastName" : btoa(credentials.lastname) },
+		//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+		processData:false,
+		contentType: "application/json; charset=utf-8",
+		dataType:"json"
+
+	}).done(function(data, text_status, jqXHR){
+		
+		console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
 		$("#ui_login").show();
 		$("#ui_play").hide();
 		$("#ui_instructions").hide();
@@ -196,8 +218,15 @@ function createAccount() {
 		$("#ui_profile").hide();
 		$('#ui_register').hide();
 		$("#registerSubmit").show();
-	}	
 
+	}).fail(function(err){
+		console.log('here');
+		setField('error', err.responseJSON.error, 'b', 0);
+		$("#errorMessage").show();
+		console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+
+	}); 	
+	console.log('there');
 }
 function play(){
 
@@ -210,7 +239,6 @@ function play(){
 	}
 	
 }
-
 function instructions(){
 
 	if (loggedIn) {
@@ -223,7 +251,6 @@ function instructions(){
 	}
 
 }
-
 function stats(){
 
 	if (loggedIn) {
@@ -259,6 +286,15 @@ function logout(){
 	loggedIn = false;
 
 }
+function setField(field, message, tag, index) {
+	var getDiv = document.getElementById(field);
+	var setTag = getDiv.getElementsByTagName(tag)[index];
+	setTag.innerHTML = message;
+}
+function resetField(field){
+	var toReset = document.getElementById(field);
+	toReset.value = toReset.defaultValue; 
+}
 // Using the /api/auth/test route, must send authorization header
 function test(){
         $.ajax({
@@ -278,7 +314,7 @@ $(function(){
         // Setup all events here and display the appropriate UI
         $("#loginSubmit").on('click',function(){ login(); });
 		$("#registerSubmit").on('click',function(){ register(); });
-		$("#createUserSubmit").on('click',function(){ createAccount(); });
+		$("#createAccount").on('click',function(){ createAccount(); });
 		$("#playButton").on('click',function(){ play(); });
 		$("#instructionsButton").on('click',function(){ instructions(); });
 		$("#statsButton").on('click',function(){ stats(); });

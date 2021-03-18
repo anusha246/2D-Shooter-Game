@@ -26,7 +26,6 @@
             </ul>
 		</nav>
 		
-		
 		<div id="ui_login">
 			<div>
 				<input type="text" id="username" placeholder="User Name" />
@@ -35,29 +34,35 @@
 			</div>
 			<a type = "submit" id = "registerSubmit" value = "Register"> Register </a>
 		</div>
+
 		<div id="ui_register">
-			<div>
+			<div id = "usernameField">
 				<input type="text" id="createUsername" placeholder="Username" required> <!-- user name -->
 			</div>
-			<div>
+			<div id = "passwordField">
 				<input type="password" id="createPassword" placeholder="Password" required> <!-- password -->
 			</div>
-			<div>
-				<div>
-					<input type="text" id="createFirstName" placeholder="First Name" required> <!-- first name -->
-				</div>
-				<div>
-					<input type="text" id="createLastName" placeholder="Last Name" required> <!-- last name -->
-				</div>
+			<div id = "emailField">
+				<input type="text" id="createEmail" placeholder="email@example.com" required> <!-- last name -->
 			</div>
-			<a type = "submit" id = "createUserSubmit" value = "Registered"> Create Account </a>
+			<div id = "firstNameField">
+				<input type="text" id="createFirstName" placeholder="First Name" required> <!-- first name -->
+			</div>
+			<div id = "lastNameField">
+				<input type="text" id="createLastName" placeholder="Last Name" required> <!-- last name -->
+			</div>
+			<div id = "requestRegister">
+				<a type = "submit" id = "createAccount" value = "Registered"> Create Account </a>
+			</div>
 		</div>
+
 		<div id="ui_play">
 			<h2>Play</h2>
 			<center>
 				<canvas id="stage" width="600" height="600" style="border:1px solid black;"> </canvas>
 			</center>
 		</div>
+
 		<div id="ui_instructions">
 			<h2>Instructions</h2>
 			<h3>Goal</h3>
@@ -72,8 +77,8 @@
 				<br>Move into boxes to restore the ammo amount written on them, 
 				<br>but you can destroy the ammo by shooting boxes
 			</p>
-			
 		</div>
+
 		<div id="ui_stats">
 			<h2>Statistics</h2>
 			<p>High Score: 50
@@ -81,6 +86,7 @@
 				<br>Enemies killed: 10
 			</p>
 		</div>
+
 		<div id="ui_profile">
 			<h2>Profile</h2>
 			<p>Username: CSC309
@@ -91,5 +97,10 @@
 				<br>[Update button]
 			</p>
 		</div>
+
+		<div id = "error">
+			<b id="errorMessage" value="error"></b>
+		</div>
+
 	</body>
 </html>
