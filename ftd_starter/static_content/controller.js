@@ -133,19 +133,18 @@ function login(){
 		"username": $("#username").val(), 
 		"password": $("#password").val() 
 	};
-		/*
+		
         $.ajax({
                 method: "POST",
                 url: "/api/auth/login",
                 data: JSON.stringify({}),
-		headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+				headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
                 processData:false,
                 contentType: "application/json; charset=utf-8",
                 dataType:"json"
         }).done(function(data, text_status, jqXHR){
                 console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
-		*/
-
+		
         	$("#ui_login").hide();
         	$("#ui_play").show();
 			$("#ui_play").hide();
@@ -153,13 +152,11 @@ function login(){
 
 		setupGame();
 		startGame();
-		pausedGame = true;
 
-		/*
+		
         }).fail(function(err){
                 console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
-        }); 
-		*/
+        }); 	
 }
 function register() {
 	//console.log("register clicked");
@@ -168,12 +165,48 @@ function register() {
 	$("#registerSubmit").hide();
 
 }
+function createAccount() {
+
+
+	credentials =  { 
+		"username": $("#createUsername").val(), 
+		"password": $("#createPassword").val() 
+	};
+	console.log(credentials);
+		
+        $.ajax({
+                method: "POST",
+                url: "/api/register",
+                data: JSON.stringify({}),
+				headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+                processData:false,
+                contentType: "application/json; charset=utf-8",
+                dataType:"json"
+        }).done(function(data, text_status, jqXHR){
+                console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+		
+				$("#ui_login").show();
+				$("#ui_play").hide();
+				$("#ui_instructions").hide();
+				$("#ui_stats").hide();
+				$("#ui_profile").hide();
+				$('#ui_register').hide();
+				$("#registerSubmit").show();
+
+
+		
+        }).fail(function(err){
+                console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+        }); 	
+
+}
 function play(){
 	$("#ui_login").hide();
 	$("#ui_play").show();
 	$("#ui_instructions").hide();
 	$("#ui_stats").hide();
 	$("#ui_profile").hide();
+
 
 }
 
@@ -203,13 +236,6 @@ function profile(){
 	$("#ui_instructions").hide();
 	$("#ui_stats").hide();
 	$("#ui_profile").show();
-	pausedGame = true;
-
-}
-function createAccount() {
-	$("#ui_login").show();
-	$("#ui_register").hide();
-	$("#registerSubmit").show();
 	pausedGame = true;
 
 }
