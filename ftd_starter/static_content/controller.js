@@ -144,7 +144,7 @@ function login(){
 		"username": $("#username").val(), 
 		"password": $("#password").val() 
 	};
-		
+		/*
         $.ajax({
 
 			method: "POST",
@@ -160,18 +160,19 @@ function login(){
         }).done(function(data, text_status, jqXHR){
             
 			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
-			
+			*/
+			$("#body").show();
         	$("#ui_login").hide();
         	$("#ui_play").show();
 			$("#ui_nav").show();
 			loggedIn = true;
 			setupGame();
 			startGame();
-		
+		/*
         }).fail(function(err){
             console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
         }); 	
-		
+		*/
 
 }
 function register() {
@@ -242,12 +243,49 @@ function instructions(){
 		$("#ui_login").hide();
 		$("#ui_play").hide();
 		$("#ui_instructions").show();
+		$("#goal").show();
+		$("#controls").hide();
+		$("#gunTypes").hide();
 		$("#ui_stats").hide();
 		$("#ui_profile").hide();
 		pausedGame = true;
 	}
 
 }
+
+function goal(){
+
+	if (loggedIn) {
+		$("#goal").show();
+		$("#controls").hide();
+		$("#gunTypes").hide();
+		pausedGame = true;
+	}
+
+}
+
+function controls(){
+
+	if (loggedIn) {
+		$("#goal").hide();
+		$("#controls").show();
+		$("#gunTypes").hide();
+		pausedGame = true;
+	}
+
+}
+
+function gunTypes(){
+
+	if (loggedIn) {
+		$("#goal").hide();
+		$("#controls").hide();
+		$("#gunTypes").show();
+		pausedGame = true;
+	}
+
+}
+
 function stats(){
 
 	if (loggedIn) {
@@ -280,6 +318,7 @@ function logout(){
 	$("#ui_instructions").hide();
 	$("#ui_stats").hide();
 	$("#ui_profile").hide();
+	$("#body").hide();
 	loggedIn = false;
 
 }
@@ -317,7 +356,14 @@ $(function(){
 		$("#statsButton").on('click',function(){ stats(); });
 		$("#profileButton").on('click',function(){ profile(); });
 		$("#logoutButton").on('click',function(){ logout(); });
+		
+		$("#goalSideButton").on('click',function(){ goal(); });
+		$("#controlsSideButton").on('click',function(){ controls(); });
+		$("#gunTypesSideButton").on('click',function(){ gunTypes(); });
+		
+		
         $("#ui_nav").hide();
+		$("#body").hide();
 		$("#ui_login").show();
 		$("#ui_register").hide();
         $("#ui_play").hide();

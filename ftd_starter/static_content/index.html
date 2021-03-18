@@ -7,13 +7,10 @@
 		<script language="javascript" src="model.js" > </script>
 		<script language="javascript" src="controller.js" > </script>
 		<link rel="stylesheet" type="text/css" href="style.css" />
-		<style>
-			#ui_login { display:block; }
-			#ui_play { display:none; }
-		</style>
+	
 		<title>f0rt9it32d</title>
 	</head>
-	<body bgcolor="ffffff">
+	<body>
 		<h1>f0rt9it32d</h1>
 
 		<nav id="ui_nav">
@@ -26,7 +23,8 @@
             </ul>
 		</nav>
 		
-		<div id="ui_login">
+		<div class="userForm" id="ui_login">
+			<h2>Login</h2>
 			<div>
 				<input type="text" id="username" placeholder="User Name" />
 				<input type="password" id="password" placeholder="Password" />
@@ -35,7 +33,8 @@
 			<a type = "submit" id = "registerSubmit" value = "Register"> Register </a>
 		</div>
 
-		<div id="ui_register">
+		<div class="userForm" id="ui_register">
+			<h2>Register</h2>
 			<div id = "usernameField">
 				<input type="text" id="createUsername" placeholder="Username" required> <!-- user name -->
 			</div>
@@ -56,58 +55,79 @@
 			</div>
 		</div>
 
-		<div id="ui_play">
-			<h2>Play</h2>
-			<center>
-				<canvas id="stage" width="600" height="600" style="border:1px solid black;"> </canvas>
-			</center>
-		</div>
+		<div id="body">
+			<div id="ui_play">
+				<h2>Play</h2>
+				<center>
+					<canvas id="stage" width="600" height="600" style="border:1px solid black;"> </canvas>
+				</center>
+			</div>
 
-		<div id="ui_instructions">
-			<h2>Instructions</h2>
-			<h3>Goal</h3>
-			<p>Be the last one standing to win!
-				<br>Gain points by shooting enemies
-			</p>
-			<h3>Controls</h3>
-			<p>Move with WASD
-				<br>Press P to pause
-				<br>Aim the turret with the mouse
-				<br>Click the left mouse button to shoot
-				<br>Move into boxes to restore the ammo amount written on them, 
-				<br>but you can destroy the ammo by shooting boxes
-				<br>Opaque boxes in the primary colors contain guns,
-				<br>these do not have numbers on them and cannot be destroyed
-			</p>
-			
-			<h3>Gun Types</h3>
-			<p id="pistolText">Blue Pistol: Fires 1 bullet at average speed and lifetime</p>
-			<p id="sniperText">Yellow Sniper: Fires 1 bullet at high speed and lifetime</p>
-			<p id="shotgunText">Red Shotgun: Fires 3 bullets at low speed and lifetime</p>
-			
-		</div>
+			<div id="ui_instructions">
+				<h2>Instructions</h2>
+				<nav id = "sidebar">
+					<ul>
+						<li><a id="goalSideButton" type = "submit" value = "Goal">Goal</a></li>
+						<li><a id="controlsSideButton" type = "submit" value = "Controls">Controls</a></li>
+						<li><a id="gunTypesSideButton" type = "submit" value = "gunTypes">Gun Types</a></li>
+						
+						
+					</ul>
+				</nav>
+				
+				<div class="instructions_section" id="goal">
+					<h3>Goal</h3>
+					<p>Be the last one standing to win!
+						<br>Gain points by shooting enemies
+					</p>
+				</div>
+				
+				<div class="instructions_section" id="controls">
+					<h3>Controls</h3>
+					<p>Move with WASD
+						<br>Press P to pause
+						<br>Aim the turret with the mouse
+						<br>Click the left mouse button to shoot
+						
+					</p>
+				</div>
+				
+				<div class="instructions_section" id="gunTypes">
+					<h3>Gun Types</h3>
+					<p>Move into numbered boxes to restore the ammo amount written on them, 
+						<br>but you can destroy the ammo by shooting boxes
+						<br><br>Opaque boxes in the primary colors contain guns,
+						<br>these do not have numbers on them and cannot be destroyed
+					</p>
+					
+					<p id="pistolText">Blue Pistol: Fires 1 bullet at average speed and lifetime</p>
+					<p id="sniperText">Yellow Sniper: Fires 1 bullet at high speed and lifetime</p>
+					<p id="shotgunText">Red Shotgun: Fires 3 bullets at low speed and lifetime</p>
+				</div>
+			</div>
 
-		<div id="ui_stats">
-			<h2>Statistics</h2>
-			<p>High Score: 50
-				<br>Longest Time Alive: 10 minutes
-				<br>Enemies killed: 10
-			</p>
-		</div>
+			<div id="ui_stats">
+				<h2>Statistics</h2>
+				<p>High Score: 50
+					<br>Longest Time Alive: 10 minutes
+					<br>Enemies killed: 10
+				</p>
+			</div>
 
-		<div id="ui_profile">
-			<h2>Profile</h2>
-			<p>Username: CSC309
-				<br>Password: 
-				<br>Confirm Password:
-				<br>Skill: Beginner
-				<br>Birthday: 16 March 2021
-				<br>[Update button]
-			</p>
-		</div>
+			<div id="ui_profile">
+				<h2>Profile</h2>
+				<p>Username: CSC309
+					<br>Password: 
+					<br>Confirm Password:
+					<br>Skill: Beginner
+					<br>Birthday: 16 March 2021
+					<br>[Update button]
+				</p>
+			</div>
 
-		<div id = "error">
-			<b id="errorMessage" value="error"></b>
+			<div id = "error">
+				<b id="errorMessage" value="error"></b>
+			</div>
 		</div>
 
 	</body>

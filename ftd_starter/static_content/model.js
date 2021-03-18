@@ -207,10 +207,7 @@ class Stage {
 		} else {
 			
 			context.setTransform(1,0,0,1,0,0);//reset the transform matrix as it is cumulative
-			
 			context.clearRect(0, 0, this.width, this.height);
-			context.strokeStyle = 'black';
-			
 			
 			
 			this.camX = -this.player.x + this.view_width / 2;
@@ -219,6 +216,9 @@ class Stage {
 			
 			context.translate( this.camX, this.camY ); 
 			
+			context.fillStyle = "white";
+			context.fillRect(0, 0, this.width, this.height);
+			context.strokeStyle = 'black';
 			context.fillStyle = 'rgba(0,0,0,1)';
 			context.strokeRect(0, 0, this.width, this.height);
 			
