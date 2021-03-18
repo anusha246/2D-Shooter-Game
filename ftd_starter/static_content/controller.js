@@ -225,7 +225,6 @@ function createAccount() {
 		console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
 
 	}); 	
-	console.log('there');
 }
 function play(){
 
@@ -309,7 +308,6 @@ function profile(){
 			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
 	
 		}); 	
-		console.log('there');
 
 	} 
 
@@ -365,7 +363,6 @@ function updateScore(score) {
 			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
 
 		}); 	
-		console.log('there'); 
 	}
 }
 function changeUsername() {
@@ -392,7 +389,8 @@ function changeUsername() {
 			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
 			
 
-			setField('ui_profile', "username: " + data.username, 'b', 0);
+			setField('ui_profile', "Username: " + data.username, 'b', 0);
+			resetField('changeUsername');
 			var getUser = document.getElementById('username');
 			getUser.value = data.username;
 			$("#ui_login").hide();
@@ -408,10 +406,50 @@ function changeUsername() {
 			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
 
 		}); 	
-		console.log('there'); 
 	}
 }
+function deleteUser() {
+	if (loggedIn) {
+		credentials =  { 
+			"username": $("#username").val(), 
+		};
+			
+		$.ajax({
 
+			method: "DELETE",
+			url: "/api/auth/delete",
+			data: JSON.stringify({}),
+			headers: { "DELETE": "delete user", "username" : btoa(credentials.username) },
+			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+			processData:false,
+			contentType: "application/json; charset=utf-8",
+			dataType:"json"
+
+		}).done(function(data, text_status, jqXHR){
+			
+			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+			
+			setField('error', data.message, 'b', 0);
+
+
+			resetField('username');
+			$("#ui_login").show();
+			$("#ui_play").hide();
+			$("#ui_instructions").hide();
+			$("#ui_stats").hide();
+			$("#ui_profile").hide();
+			$("#ui_nav").hide();
+
+			pausedGame = true;
+
+		}).fail(function(err){
+			setField('error', err.responseJSON.error, 'b', 0);
+			$("#errorMessage").show();
+			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+
+		}); 	
+	}
+}
 function changeEmail() {
 	if (loggedIn) {
 		credentials =  { 
@@ -435,7 +473,7 @@ function changeEmail() {
 			
 			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
 			
-
+			resetField('changeEmail');
 			setField('ui_profile', "Email: " + data.email, 'b', 2);
 			$("#ui_login").hide();
 			$("#ui_play").hide();
@@ -450,7 +488,6 @@ function changeEmail() {
 			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
 
 		}); 	
-		console.log('there'); 
 	}
 }
 function updateField(field, message, tag, index) {
@@ -494,7 +531,7 @@ $(function(){
 		$("#logoutButton").on('click',function(){ logout(); });
 		$("#changeUsernameButton").on('click',function(){ changeUsername(); });
 		$("#changeEmailButton").on('click',function(){ changeEmail(); });
-
+		$("#deleteUserButton").on('click',function(){ deleteUser(); });
         $("#ui_nav").hide();
 		$("#ui_login").show();
 		$("#ui_register").hide();

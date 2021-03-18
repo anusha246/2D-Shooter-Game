@@ -117,7 +117,6 @@ app.use('/api/auth/profile', function (req, res,next) {
 	}
 });
 
-
 app.use('/api/auth/updateScore', function (req, res,next) {
 	console.log("update score");
 	console.log(req.method)
@@ -189,10 +188,6 @@ app.use('/api/auth/updateUsername', function (req, res, next) {
 		console.log(oldUsername);
 		console.log(username);
 
-		if (username == null || username == '' || username.length > 20) {
-			return res.status(403).json({error : "Please enter a valid username. \
-			Usernames must be unique and less than 20 characters long."});
-		}
 		let sql = 'SELECT * FROM ftduser WHERE username=$1';
         	pool.query(sql, [oldUsername], (err, pgRes) => {
   			if (err){
@@ -267,8 +262,6 @@ app.use('/api/auth/updateEmail', function (req, res, next) {
 			characters long"});
 	}
 });
-
-
 
 app.use('/api/register', function (req, res,next) {
 	console.log("ahhh");
@@ -358,6 +351,43 @@ app.use('/api/register', function (req, res,next) {
 
 });
 
+app.use('/api/auth/delete', function (req, res, next) {
+
+	console.log("delete user");
+	console.log(req.method)
+	if (!req.method || req.method != "DELETE") {
+		return res.status(403).json({ error: 'Invalid method type, please use DELETE for deleting user' });
+	} else if (!req.headers.username) {
+		return res.status(403).json({ error: 'username not specified' });
+	}
+
+	try {
+		//Regex match the new username and password to a valid username.
+		//That is, usernames are only digits and alphabet letters.
+		var u = /(([\w]|[\W])*)$/.exec(req.headers.username);
+		var uname = Buffer.from(u[1], 'base64').toString();
+		u = /(([\w])*)$/.exec(uname); //Only A-Z, a-z, 0-9, and the underscore
+		var username = u[1];
+
+		console.log(username);
+
+		let sql = 'SELECT * FROM ftduser WHERE username=$1';
+        	pool.query(sql, [username], (err, pgRes) => {
+  			if (err){
+                return res.status(403).json({error : "Could not delete user. (Are you authenticated?)"});
+			} else if(pgRes.rowCount == 1){
+				let sql_delete = 'DELETE FROM ftduser WHERE username=$1';
+				pool.query(sql_delete, [username], (err));
+				res.status(200).json({'message': 'Success. User deleted.'});
+			} else {
+				return res.status(403).json({error : "Could not delete user. (Are you authenticated?)"});
+        	}
+		});
+	} catch(err) {
+               	res.status(403).json({ error: 'Could not delete user. (Are you authenticated?)'});
+	}
+});
+
 // All routes below /api/auth require credentials 
 app.post('/api/auth/login', function (req, res) {
 	res.status(200); 
@@ -367,6 +397,11 @@ app.post('/api/auth/login', function (req, res) {
 app.get('/api/auth/profile', function (req, res) {
 	res.status(200); 
 	res.json({"message":"profile information extraction success"}); 
+});
+
+app.delete('/api/auth/delete', function(req, res) {
+	res.status(200); 
+	res.json({"message":"profile deletion success"}); 
 });
 
 app.put('/api/auth/updateScore', function (req, res) {
