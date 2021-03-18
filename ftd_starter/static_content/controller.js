@@ -150,8 +150,8 @@ function login(){
 			method: "POST",
 			url: "/api/auth/login",
 			data: JSON.stringify({}),
-			headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
-			"Password" : btoa(credentials.password) },
+			headers: { "Authorization": "Basic", "username" : btoa(credentials.username), 
+			"password" : btoa(credentials.password) },
 			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
 			processData:false,
 			contentType: "application/json; charset=utf-8",
@@ -199,9 +199,9 @@ function createAccount() {
 		method: "POST",
 		url: "/api/register",
 		data: JSON.stringify({}),
-		headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
-		"Password" : btoa(credentials.password), "Email" : btoa(credentials.email),
-		"FirstName" : btoa(credentials.firstname), "LastName" : btoa(credentials.lastname) },
+		headers: { "Authorization": "Basic", "username" : btoa(credentials.username), 
+		"password" : btoa(credentials.password), "email" : btoa(credentials.email),
+		"firstName" : btoa(credentials.firstname), "lastName" : btoa(credentials.lastname) },
 		//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
 		processData:false,
 		contentType: "application/json; charset=utf-8",
@@ -275,7 +275,7 @@ function profile(){
 			method: "GET",
 			url: "/api/auth/profile",
 			data: JSON.stringify({}),
-			headers: { "GET": "Profile information", "Username" : btoa(credentials.username) },
+			headers: { "GET": "Profile information", "username" : btoa(credentials.username) },
 			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
 			processData:false,
 			contentType: "application/json; charset=utf-8",
@@ -336,7 +336,7 @@ function updateScore(score) {
 			method: "PUT",
 			url: "/api/auth/updateScore",
 			data: JSON.stringify({}),
-			headers: { "PUT": "Score information", "Username" : btoa(credentials.username), "Score" : score },
+			headers: { "PUT": "Score information", "username" : btoa(credentials.username), "score" : score },
 			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
 			processData:false,
 			contentType: "application/json; charset=utf-8",
@@ -380,7 +380,7 @@ function changeUsername() {
 			method: "PUT",
 			url: "/api/auth/updateUsername",
 			data: JSON.stringify({}),
-			headers: { "PUT": "New username", "Username" : btoa(credentials.username), 
+			headers: { "PUT": "New username", "username" : btoa(credentials.username), 
 			"oldUsername" : btoa(credentials.oldusername) },
 			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
 			processData:false,
@@ -392,9 +392,51 @@ function changeUsername() {
 			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
 			
 
-			setField('ui_profile', "Username: " + data.username, 'b', 0);
+			setField('ui_profile', "username: " + data.username, 'b', 0);
 			var getUser = document.getElementById('username');
 			getUser.value = data.username;
+			$("#ui_login").hide();
+			$("#ui_play").hide();
+			$("#ui_instructions").hide();
+			$("#ui_stats").hide();
+			$("#ui_profile").show();
+			pausedGame = true;
+
+		}).fail(function(err){
+			setField('error', err.responseJSON.error, 'b', 0);
+			$("#errorMessage").show();
+			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+
+		}); 	
+		console.log('there'); 
+	}
+}
+
+function changeEmail() {
+	if (loggedIn) {
+		credentials =  { 
+			"username": $("#username").val(), 
+			"email": $("#changeEmail").val(), 
+		};
+			
+		$.ajax({
+
+			method: "PUT",
+			url: "/api/auth/updateEmail",
+			data: JSON.stringify({}),
+			headers: { "PUT": "New email", "username" : btoa(credentials.username), 
+			"email" : btoa(credentials.email) },
+			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+			processData:false,
+			contentType: "application/json; charset=utf-8",
+			dataType:"json"
+
+		}).done(function(data, text_status, jqXHR){
+			
+			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+			
+
+			setField('ui_profile', "Email: " + data.email, 'b', 2);
 			$("#ui_login").hide();
 			$("#ui_play").hide();
 			$("#ui_instructions").hide();
@@ -451,6 +493,8 @@ $(function(){
 		$("#profileButton").on('click',function(){ profile(); });
 		$("#logoutButton").on('click',function(){ logout(); });
 		$("#changeUsernameButton").on('click',function(){ changeUsername(); });
+		$("#changeEmailButton").on('click',function(){ changeEmail(); });
+
         $("#ui_nav").hide();
 		$("#ui_login").show();
 		$("#ui_register").hide();

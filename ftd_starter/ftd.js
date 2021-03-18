@@ -213,6 +213,61 @@ app.use('/api/auth/updateUsername', function (req, res, next) {
 	}
 });
 
+app.use('/api/auth/updateEmail', function (req, res, next) {
+	console.log("update email");
+	console.log(req.method)
+	if (!req.method || req.method != "PUT") {
+		return res.status(403).json({ error: 'Invalid method type, please use PUT for updating email' });
+	} else if (!req.headers.email) {
+		return res.status(403).json({ error: 'New email not specified' });
+	} else if (!req.headers.username) {
+		return res.status(403).json({ error: 'Current username not specified' });
+	}
+	try {
+		//Regex match the current username and password to a valid username.
+		//That is, usernames are only digits and alphabet letters.
+		var u = /(([\w]|[\W])*)$/.exec(req.headers.username);
+		var uname = Buffer.from(u[1], 'base64').toString();
+		u = /(([\w])*)$/.exec(uname); //Only A-Z, a-z, 0-9, and the underscore
+		var username = u[1];
+
+		//Emails are digits & letters.
+		var e = /(([\w]|[\W])*)$/.exec(req.headers.email);
+		var mail = Buffer.from(e[1], 'base64').toString();
+		//Only letters, 0-9, hyphen, period, underscore, plus, and @ sign
+		e = /(([\w]|[\.]|[\+]|[\-])*@([\w]|[\.]|[\+]|[\-])*)$/.exec(mail) ;
+		var email = e[1];
+
+		if (email == null || email == '' || email.length > 78) {
+			return res.status(403).json({error : "Please enter a valid email. Emails must be less than 78 \
+			characters long"});
+		}
+		console.log(email);
+		console.log(username);
+
+		if (username == null || username == '' || username.length > 20) {
+			return res.status(403).json({error : "Current username specified is invalid. Please log in as a valid user."});
+		}
+		let sql = 'SELECT * FROM ftduser WHERE username=$1';
+		pool.query(sql, [username], (err, pgRes) => {
+			if (err){
+				return res.status(403).json({error : "Please enter a valid email. Emails must be less than 78 \
+				characters long"});	
+			} else if(pgRes.rowCount == 1){
+				let sql_insert = 'UPDATE ftduser SET email=$2 WHERE username=$1';
+				pool.query(sql_insert, [username,email], (err));
+				res.status(200).json({ 'message': 'Success. Username updated.', 'email': email});
+			} else {
+				return res.status(403).json({error : "Please enter a valid email. Emails must be less than 78 \
+				characters long"});
+			}
+		});
+	} catch(err) {
+			return res.status(403).json({error : "Please enter a valid email. Emails must be less than 78 \
+			characters long"});
+	}
+});
+
 
 
 app.use('/api/register', function (req, res,next) {
@@ -238,20 +293,20 @@ app.use('/api/register', function (req, res,next) {
 
 		//Emails are digits & letters.
 		var e = /(([\w]|[\W])*)$/.exec(req.headers.email);
-		var mail = Buffer.from(e[1], 'base64').toString()
+		var mail = Buffer.from(e[1], 'base64').toString();
 		//Only letters, 0-9, hyphen, period, underscore, plus, and @ sign
-		e = /(([\w]|[\.]|[\+]|[\-])*@([\w]|[\.]|[\+]|[\-])*)$/.exec(mail) 
+		e = /(([\w]|[\.]|[\+]|[\-])*@([\w]|[\.]|[\+]|[\-])*)$/.exec(mail);
 
 		//First names are only alphabet characters
 		var f = /(([\w]|[\W])*)$/.exec(req.headers.firstname);
-		var fname = Buffer.from(f[1], 'base64').toString()
-		console.log(fname)
-		f = /(([A-Z]|[a-z])*)$/.exec(fname) //Only A-Z, a-z
+		var fname = Buffer.from(f[1], 'base64').toString();
+		console.log(fname);
+		f = /(([A-Z]|[a-z])*)$/.exec(fname); //Only A-Z, a-z
 
 		//Last names are only alphabet characters
 		var l = /(([\w]|[\W])*)$/.exec(req.headers.lastname);
-		var lname = Buffer.from(l[1], 'base64').toString()
-		l = /([A-Za-z]*)$/.exec(lname) //Only A-Z, a-z
+		var lname = Buffer.from(l[1], 'base64').toString();
+		l = /([A-Za-z]*)$/.exec(lname); //Only A-Z, a-z
 
 		console.log(u);
 		console.log(p);
