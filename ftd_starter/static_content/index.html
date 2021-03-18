@@ -99,13 +99,19 @@
 			<h2>Profile</h2>
 			<p>
 				<b id = "profileUsername">Username: </b><br>
-				<b id = "profilePassword">Password: </b><br>
+				<div id = "changeUsernameField">
+					<input type="text" id="changeUsername" placeholder = "New Username"/>
+					<input type="submit" id="changeUsernameButton" value="Change Username"/>
+				</div>
+				<b id = "profilePassword">Password: <span>&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;</span> </b><br>
 				<b id = "profileEmail">Email: </b><br>
-				<b id = "profileFirstName">First Name: </b><br>
+				<b id = "profileFirstName">: </b><br>
 				<b id = "profileLastName">Last Name: </b><br>
 				<b id = "profileScore">Score: </b><br>
 			</p>
 		</div>
+
+
 
 		<div id = "error">
 			<b id="errorMessage" value="error"></b>

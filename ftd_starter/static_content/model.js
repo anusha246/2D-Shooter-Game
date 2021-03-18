@@ -109,6 +109,7 @@ class Stage {
 							
 							if (this.player && this.actors[i].shotFrom == "Player") {
 								this.player.score++;
+								updateScore(this.player.score);
 							}
 						}
 						break;

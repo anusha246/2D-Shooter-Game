@@ -285,15 +285,15 @@ function profile(){
 			
 			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
 			
-			updateField('ui_profile', data.username, 'b', 0);
-			updateField('ui_profile', data.email, 'b', 2);
-			updateField('ui_profile', data.firstname, 'b', 3);
-			updateField('ui_profile', data.lastname, 'b', 4);
+			setField('ui_profile', "Username: " + data.username, 'b', 0);
+			setField('ui_profile', "Email: " + data.email, 'b', 2);
+			setField('ui_profile', "First Name: " + data.firstname, 'b', 3);
+			setField('ui_profile', "Last Name: " + data.lastname, 'b', 4);
 			if (!data.score) {
-				updateField('ui_profile', 0, 'b', 5);
+				setField('ui_profile', "Score: 0", 'b', 5);
 			}
 			else {
-				updateField('ui_profile', data.score, 'b', 5);
+				setField('ui_profile', "Score: " + data.score, 'b', 5);
 			}
 			//updateField('ui_profile', JSON.stringify(data), 'b', 0);
 			$("#ui_login").hide();
@@ -324,6 +324,92 @@ function logout(){
 	$("#ui_profile").hide();
 	loggedIn = false;
 
+}
+function updateScore(score) {
+	if (loggedIn) {
+		credentials =  { 
+			"username": $("#username").val(), 
+		};
+
+		$.ajax({
+
+			method: "PUT",
+			url: "/api/auth/updateScore",
+			data: JSON.stringify({}),
+			headers: { "PUT": "Score information", "Username" : btoa(credentials.username), "Score" : score },
+			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+			processData:false,
+			contentType: "application/json; charset=utf-8",
+			dataType:"json"
+
+		}).done(function(data, text_status, jqXHR){
+			
+			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+			
+			if (!data.score) {
+				setField('ui_profile', "Score: 0", 'b', 5);
+			}
+			else {
+				setField('ui_profile', "Score: " + data.score, 'b', 5);
+			}
+			//updateField('ui_profile', JSON.stringify(data), 'b', 0);
+			$("#ui_login").hide();
+			$("#ui_play").show();
+			$("#ui_instructions").hide();
+			$("#ui_stats").hide();
+			$("#ui_profile").hide();
+
+		}).fail(function(err){
+			setField('error', err.responseJSON.error, 'b', 0);
+			$("#errorMessage").show();
+			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+
+		}); 	
+		console.log('there'); 
+	}
+}
+function changeUsername() {
+	if (loggedIn) {
+		credentials =  { 
+			"oldusername": $("#username").val(), 
+			"username": $("#changeUsername").val(), 
+		};
+			
+		$.ajax({
+
+			method: "PUT",
+			url: "/api/auth/updateUsername",
+			data: JSON.stringify({}),
+			headers: { "PUT": "New username", "Username" : btoa(credentials.username), 
+			"oldUsername" : btoa(credentials.oldusername) },
+			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+			processData:false,
+			contentType: "application/json; charset=utf-8",
+			dataType:"json"
+
+		}).done(function(data, text_status, jqXHR){
+			
+			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+			
+
+			setField('ui_profile', "Username: " + data.username, 'b', 0);
+			var getUser = document.getElementById('username');
+			getUser.value = data.username;
+			$("#ui_login").hide();
+			$("#ui_play").hide();
+			$("#ui_instructions").hide();
+			$("#ui_stats").hide();
+			$("#ui_profile").show();
+			pausedGame = true;
+
+		}).fail(function(err){
+			setField('error', err.responseJSON.error, 'b', 0);
+			$("#errorMessage").show();
+			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+
+		}); 	
+		console.log('there'); 
+	}
 }
 function updateField(field, message, tag, index) {
 	var getDiv = document.getElementById(field);
@@ -364,6 +450,7 @@ $(function(){
 		$("#statsButton").on('click',function(){ stats(); });
 		$("#profileButton").on('click',function(){ profile(); });
 		$("#logoutButton").on('click',function(){ logout(); });
+		$("#changeUsernameButton").on('click',function(){ changeUsername(); });
         $("#ui_nav").hide();
 		$("#ui_login").show();
 		$("#ui_register").hide();
@@ -371,6 +458,7 @@ $(function(){
 		$("#ui_instructions").hide();
 		$("#ui_stats").hide();
 		$("#ui_profile").hide();
+
 		
 });
 
