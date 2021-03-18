@@ -91,7 +91,7 @@ app.use('/api/register', function (req, res,next) {
 		//That is, usernames are only digits and alphabet letters with two exceptions, dots and underscore.  
 		var u = /(([\w]|[\W])*)$/.exec(req.headers.username);
 		var uname = Buffer.from(u[1], 'base64').toString()
-		u = /(([\w]|[\.])*){1,20}$/.exec(uname) //Only A-Z, a-z, 0-9, the underscore, and a dot
+		u = /(([\w]|[\.])*)$/.exec(uname) //Only A-Z, a-z, 0-9, the underscore, and a dot
 
 		//Passwords are special characters & letters.
 		var p = /(([\w]|[\W])*)$/.exec(req.headers.password);
@@ -129,8 +129,28 @@ app.use('/api/register', function (req, res,next) {
 		var email = e[1];
 		var firstname = f[1];
 		var lastname = l[1];
-
 		console.log(username+" "+password+" "+email+" "+firstname+" "+lastname);
+
+		if (username == null || username == '' || username.length > 20) {
+			res.status(403).json({error : "Please enter a valid username. \
+			Usernames must be unique and less than 20 characters long."});
+		} else if (password == null || password == '' || password.length > 20 || password.length < 6) {
+			res.status(403).json({error : "Please enter a valid password. \
+			Passwords must be between 6 and 20 characters long."});
+			return;
+		} else if (email == null || email == '' || email.length > 78) {
+			res.status(403).json({error : "Please enter a valid email. Emails must be less than 78 \
+			characters long"});
+			return;
+		} else if (firstname == null || firstname == '' || firstname.length > 20) {
+			res.status(403).json({error : "Please enter a valid first name strictly in the english \
+			alphabet and less than 20 characters in length."});
+			return;
+		} else if (lastname == null || lastname == '' || lastname.length > 20) {
+			res.status(403).json({error : "Please enter a valid last names trictly in the english \
+			alphabet and less than 20 characters in length."});
+			return;
+		}
 
 		let sql_check = 'SELECT * FROM ftduser WHERE username=$1';
         	pool.query(sql_check, [username], (err, pgRes) => {
@@ -146,7 +166,8 @@ app.use('/api/register', function (req, res,next) {
         	}
 		});
 	} catch(err) {
-               	res.status(403).json({ error: 'Please enter a valid username and password'});
+		
+        res.status(403).json({ error: 'Please ensure all fields are valid'});
 	}
 
 });
