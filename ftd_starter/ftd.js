@@ -38,19 +38,33 @@ app.post('/api/test', function (req, res) {
  * Authorization: Basic YXJub2xkOnNwaWRlcm1hbg==
  * Authorization: Basic " + btoa("arnold:spiderman"); in javascript
 **/
-app.use('/api/auth', function (req, res,next) {
-	if (!req.headers.authorization) {
-		return res.status(403).json({ error: 'No credentials sent!' });
+app.use('/api/auth/login', function (req, res,next) {
+	console.log("login");
+
+	if (!req.headers.username || !req.headers.password) {
+		return res.status(403).json({ error: 'Please enter both a username and password' });
   	}
 	try {
-		// var credentialsString = Buffer.from(req.headers.authorization.split(" ")[1], 'base64').toString();
-		var m = /^Basic\s+(.*)$/.exec(req.headers.authorization);
+		//Regex match the username and password to a valid username and password.
+		//That is, usernames are only digits and alphabet letters. Passwords are special characters & letters. 
+		var u = /(([\w]|[\W])*)$/.exec(req.headers.username);
+		var uname = Buffer.from(u[1], 'base64').toString()
+		u = /(([\w])*)$/.exec(uname) //Only A-Z, a-z, 0-9, and the underscore
+		var p = /(([\w]|[\W])*)$/.exec(req.headers.password);
+		var pword = Buffer.from(p[1], 'base64').toString()
+		p = /(([\w]|[\W])*)$/.exec(pword) //Alphabet, digits, and any special character
 
-		var user_pass = Buffer.from(m[1], 'base64').toString()
-		m = /^(.*):(.*)$/.exec(user_pass); // probably should do better than this
+		console.log(u)
 
-		var username = m[1];
-		var password = m[2];
+		//m = /^(.*):(.*)$/.exec(user_pass); // probably should do better than this
+		
+		console.log(u)
+
+		
+		console.log(p)
+		
+		var username = u[1];
+		var password = p[1];
 
 		console.log(username+" "+password);
 
@@ -69,10 +83,51 @@ app.use('/api/auth', function (req, res,next) {
 	}
 });
 
+app.use('/api/register', function (req, res,next) {
+	console.log("ahhh");
+
+	if (!req.headers.authorization) {
+		return res.status(403).json({ error: 'No credentials sent!' });
+  	}
+	try {
+		// var credentialsString = Buffer.from(req.headers.authorization.split(" ")[1], 'base64').toString();
+		var m = /^Basic\s+(.*)$/.exec(req.headers.authorization);
+
+		var user_pass = Buffer.from(m[1], 'base64').toString()
+		m = /^(.*):(.*)$/.exec(user_pass); // probably should do better than this
+
+		var username = m[1];
+		var password = m[2];
+
+		console.log(username+" "+password);
+
+		let sql_check = 'SELECT * FROM ftduser WHERE username=$1 and password=sha512($2)';
+        	pool.query(sql_check, [username, password], (err, pgRes) => {
+  			if (err){
+                res.status(403).json({ error: 'Please enter a valid username and password'});
+			} else if(pgRes.rowCount == 1){
+				res.status(403).json({ error: 'User already exists!'});
+			} else {
+				let sql_insert = 'INSERT INTO ftduser (username, password) VALUES ($1, sha512($2))';
+				pool.query(sql_insert, [username, password], (err));
+				next(); 	
+        	}
+		});
+	} catch(err) {
+               	res.status(403).json({ error: 'Please enter a valid username and password'});
+	}
+
+});
+
 // All routes below /api/auth require credentials 
 app.post('/api/auth/login', function (req, res) {
 	res.status(200); 
 	res.json({"message":"authentication success"}); 
+});
+
+app.post('/api/register', function (req, res) {
+	res.status(200);
+	res.json({"message":"successfully registered user"});
 });
 
 app.post('/api/auth/test', function (req, res) {

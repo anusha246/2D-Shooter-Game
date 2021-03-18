@@ -4,6 +4,7 @@ var interval=null;
 var credentials={ "username": "", "password":"" };
 var pausedGame = false;
 const SPEED = 3;
+var loggedIn = false;
 
 function setupGame(){
 	stage=new Stage(document.getElementById('stage'));
@@ -143,98 +144,120 @@ function shootByMouse(event){
 }
 
 function login(){
+
 	credentials =  { 
 		"username": $("#username").val(), 
 		"password": $("#password").val() 
 	};
 		
         $.ajax({
-                method: "POST",
-                url: "/api/auth/login",
-                data: JSON.stringify({}),
-		headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
-                processData:false,
-                contentType: "application/json; charset=utf-8",
-                dataType:"json"
-        }).done(function(data, text_status, jqXHR){
-                console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
-		
 
+			method: "POST",
+			url: "/api/auth/login",
+			data: JSON.stringify({}),
+			headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
+			"Password" : btoa(credentials.password) },
+			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+			processData:false,
+			contentType: "application/json; charset=utf-8",
+			dataType:"json"
+
+        }).done(function(data, text_status, jqXHR){
+            
+			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
         	$("#ui_login").hide();
         	$("#ui_play").show();
 			$("#ui_play").hide();
 			$("#ui_nav").show();
+			loggedIn = true;
+			setupGame();
+			startGame();
 
-		setupGame();
-		startGame();
-		pausedGame = true;
-
-		/*
         }).fail(function(err){
-                console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
-        }); 
-		*/
+            console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+        }); 	
+
 }
 function register() {
+
 	//console.log("register clicked");
 	$("#ui_login").hide();
 	$("#ui_register").show();
 	$("#registerSubmit").hide();
 
 }
-function play(){
-	$("#ui_login").hide();
-	$("#ui_play").show();
-	$("#ui_instructions").hide();
-	$("#ui_stats").hide();
-	$("#ui_profile").hide();
+function createAccount() {
 
+	if (loggedIn) {
+		$("#ui_login").show();
+		$("#ui_play").hide();
+		$("#ui_instructions").hide();
+		$("#ui_stats").hide();
+		$("#ui_profile").hide();
+		$('#ui_register').hide();
+		$("#registerSubmit").show();
+	}	
+
+}
+function play(){
+
+	if (loggedIn) {
+		$("#ui_login").hide();
+		$("#ui_play").show();
+		$("#ui_instructions").hide();
+		$("#ui_stats").hide();
+		$("#ui_profile").hide();
+	}
+	
 }
 
 function instructions(){
-	$("#ui_login").hide();
-	$("#ui_play").hide();
-	$("#ui_instructions").show();
-	$("#ui_stats").hide();
-	$("#ui_profile").hide();
-	pausedGame = true;
+
+	if (loggedIn) {
+		$("#ui_login").hide();
+		$("#ui_play").hide();
+		$("#ui_instructions").show();
+		$("#ui_stats").hide();
+		$("#ui_profile").hide();
+		pausedGame = true;
+	}
 
 }
 
 function stats(){
-	$("#ui_login").hide();
-	$("#ui_play").hide();
-	$("#ui_instructions").hide();
-	$("#ui_stats").show();
-	$("#ui_profile").hide();
-	pausedGame = true;
+
+	if (loggedIn) {
+		$("#ui_login").hide();
+		$("#ui_play").hide();
+		$("#ui_instructions").hide();
+		$("#ui_stats").show();
+		$("#ui_profile").hide();
+		pausedGame = true;
+	}
 
 }
-
 function profile(){
-	$("#ui_login").hide();
-	$("#ui_play").hide();
-	$("#ui_instructions").hide();
-	$("#ui_stats").hide();
-	$("#ui_profile").show();
-	pausedGame = true;
 
-}
-function createAccount() {
-	$("#ui_login").show();
-	$("#ui_register").hide();
-	$("#registerSubmit").show();
-	pausedGame = true;
+	if (loggedIn) {
+		$("#ui_login").hide();
+		$("#ui_play").hide();
+		$("#ui_instructions").hide();
+		$("#ui_stats").hide();
+		$("#ui_profile").show();
+		pausedGame = true;
+	} 
 
 }
 function logout(){
+
 	$("#ui_nav").hide();
 	$("#ui_login").show();
 	$("#ui_play").hide();
 	$("#ui_instructions").hide();
 	$("#ui_stats").hide();
 	$("#ui_profile").hide();
-	pausedGame = true;
+	loggedIn = false;
+
 }
 // Using the /api/auth/test route, must send authorization header
 function test(){

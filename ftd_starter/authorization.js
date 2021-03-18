@@ -48,8 +48,8 @@ function authorize(req, res, next){
  * credentials. Now this is not secure, but this is a first step.
  *
 **/
-app.use('/api/auth', authorize);
-app.use('/content/auth/',authorize); 
+//app.use('/api/auth', authorize);
+//app.use('/content/auth/',authorize); 
 
 // All routes below /api/auth require credentials 
 app.post('/api/auth/login', function (req, res) {
