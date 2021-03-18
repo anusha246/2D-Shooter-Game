@@ -31,19 +31,26 @@ function animate() {
 	}
 }
 function pauseGame(){
-	//console.log('here');
-	//stage.pauseGame(pausedGame);
+	
 	
 	
 	var context = stage.canvas.getContext('2d');
-	context.fillStyle = 'rgba(0,0,0,0.5)';
-	context.fillRect(0, 0, stage.width, stage.height);
+	//context.setTransform(1,0,0,1,0,0);
+	//context.translate( stage.camX, stage.camY );
 	
+	context.fillStyle = 'rgba(0,0,0,0.5)';
+	
+	context.fillRect(-stage.view_width, -stage.view_height, 
+					stage.width+stage.view_width + stage.view_width, 
+					stage.height+stage.view_height + stage.view_height);
+			
+					
 	context.font = "30px Courier New";
 	context.fillStyle = "white";
 	context.textAlign = "center";
-	context.fillText("Paused", stage.width/2, stage.height/2);
-	context.fillText("Press 'p' to resume", stage.width/2, stage.height/2 + 30);
+	context.fillText("Paused", stage.player.position.x, stage.player.position.y);
+	context.fillText("Press 'p' to resume", stage.player.position.x, stage.player.position.y + 30);
+	
 	
 	
 }
@@ -52,9 +59,19 @@ function pauseGame(){
 //https://stackoverflow.com/questions/17130395/real-mouse-position-in-canvas
 function getMousePos(event) {
     var rect = stage.canvas.getBoundingClientRect();
-    return new Pair(
-					(event.clientX - rect.left) / (rect.right - rect.left) * stage.canvas.width,
-					(event.clientY - rect.top) / (rect.bottom - rect.top) * stage.canvas.height);
+	
+	if (!stage.isGameDone){
+	
+		console.log(event.clientX, +"    "+event.clientY);
+		console.log(new Pair((event.clientX - rect.left) / (rect.right - rect.left) * stage.width + stage.player.position.x - stage.width/2,
+						(event.clientY - rect.top) / (rect.bottom - rect.top) * stage.height + stage.player.position.y - stage.height/2));
+		
+		return new Pair((event.clientX - rect.left) / (rect.right - rect.left) * stage.width + stage.player.position.x - stage.width/2,
+						(event.clientY - rect.top) / (rect.bottom - rect.top) * stage.height + stage.player.position.y - stage.height/2);
+	}
+		
+	
+					
 }
 function actionByKey(event){
 
@@ -97,14 +114,11 @@ function aimByMouse(event){
 function shootByMouse(event){
 	
 	var mouse_pos = getMousePos(event);
-	console.log(mouse_pos.x + " " + mouse_pos.y);
-	//console.log(stage.player.turret_pos);
-	//console.log("bye");
 
-	//If game not done and unpaused and click within canvas
+	//If game not done and unpaused and turret within canvas
 	if (!stage.isGameDone && !pausedGame && 
-		mouse_pos.x>=0 && mouse_pos.x<=stage.width &&
-		mouse_pos.y>=0 && mouse_pos.y<=stage.height){
+		stage.player.turret_pos.x>=0 && stage.player.turret_pos.x<=stage.width &&
+		stage.player.turret_pos.y>=0 && stage.player.turret_pos.y<=stage.height){
 		//console.log("hi");
 		//If player has ammo, shoot a bullet from turret, decrease ammo count
 		if (stage.player.ammo > 0){
@@ -133,7 +147,7 @@ function login(){
 		"username": $("#username").val(), 
 		"password": $("#password").val() 
 	};
-		/*
+		
         $.ajax({
                 method: "POST",
                 url: "/api/auth/login",
@@ -144,7 +158,7 @@ function login(){
                 dataType:"json"
         }).done(function(data, text_status, jqXHR){
                 console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
-		*/
+		
 
         	$("#ui_login").hide();
         	$("#ui_play").show();

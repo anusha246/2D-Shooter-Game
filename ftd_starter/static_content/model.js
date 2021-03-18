@@ -10,8 +10,15 @@ class Stage {
 		this.isGameDone = false;
 	
 		// the logical width and height of the stage
-		this.width=canvas.width;
-		this.height=canvas.height;
+		this.width=800;
+		this.height=800;
+		
+		
+		this.view_width=canvas.width;
+		this.view_height=canvas.height;
+		this.camX = this.width/2;
+		this.camY = this.height/2;
+		
 
 		//Starter values for both player and opponents
 		var velocity = new Pair(0,0);
@@ -42,11 +49,11 @@ class Stage {
 		
 		//Create player
 		var score = 0;
-		var position = new Pair(Math.floor(this.width/2), Math.floor(this.height/2));
+		this.midPosition = new Pair(Math.floor(this.width/2), Math.floor(this.height/2));
 		var colour= 'rgba(0,0,0,1)';
 		
 		this.score = score;
-		this.addPlayer(new Player(this, position, velocity, colour, radius, 
+		this.addPlayer(new Player(this, this.midPosition, velocity, colour, radius, 
 									aim_pos, turret_pos, health, ammo, score));
 		
 		
@@ -109,6 +116,13 @@ class Stage {
 				
 				if(shouldStep){
 					this.actors[i].step();
+					
+					
+					if (this.actors[i] == this.player){
+						this.actors[i].aim_pos.x += this.actors[i].velocity.x;
+						this.actors[i].aim_pos.y += this.actors[i].velocity.y;
+					}
+					
 				} 
 					
 						
@@ -129,7 +143,10 @@ class Stage {
 			//If actor exists and has health, remove it if health is 0
 			if (this.actors[i] && typeof this.actors[i].health == 'number'){
 				if (this.actors[i].health <= 0){
+					
+					//Save score and position in case of player death
 					this.score = this.player.score;
+					this.midPosition = this.player.position;
 					
 					if (this.actors[i] == this.player){
 						this.removePlayer(this.actors[i]);
@@ -161,32 +178,53 @@ class Stage {
 		
 		if (this.isGameDone){
 			context.fillStyle = 'rgba(0,0,0,0.5)';
-			context.fillRect(0, 0, stage.width, stage.height);
+			context.fillRect(-this.view_width, -this.view_height, 
+					this.width+this.view_width + this.view_width, this.height+this.view_height + this.view_height);
 			
 			context.font = "30px Courier New";
 			context.fillStyle = "white";
 			context.textAlign = "center";
 			
 			if (this.player == null){
-				context.fillText("Game Over", stage.width/2, stage.height/2);
+				context.fillText("Game Over", this.midPosition.x, this.midPosition.y);
 				context.fillText("Your score is " + this.score, 
-									stage.width/2, stage.height/2 + 30);
+									this.midPosition.x, this.midPosition.y + 30);
 									
 			//All opponents are dead
 			} else {
 				var bonus = 5;
 				this.score += bonus;
 				
-				context.fillText("You Won!", stage.width/2, stage.height/2);
+				context.fillText("You Won!", this.midPosition.x, this.midPosition.y);
 				context.fillText("The win bonus is " + bonus, 
-									stage.width/2, stage.height/2 + 30);
+									this.midPosition.x, this.midPosition.y + 30);
 				context.fillText("Your score is " + this.score, 
-									stage.width/2, stage.height/2 + 60);
+									this.midPosition.x, this.midPosition.y + 60);
 			}
 				
 				
 		} else {
+			
+			context.setTransform(1,0,0,1,0,0);//reset the transform matrix as it is cumulative
+			
 			context.clearRect(0, 0, this.width, this.height);
+			context.strokeStyle = 'black';
+			
+			
+			
+			this.camX = -this.player.x + this.view_width / 2;
+			this.camY = -this.player.y + this.view_height / 2;
+			
+			
+			context.translate( this.camX, this.camY ); 
+			
+			context.fillStyle = 'rgba(0,0,0,1)';
+			context.strokeRect(0, 0, this.width, this.height);
+			//context.fillRect(-this.view_width, -this.view_height, 
+			//		this.width+this.view_width + this.view_width, this.height+this.view_height + this.view_height);
+			
+			
+			
 			for(var i=0;i<this.actors.length;i++){
 
 				//If actor exists, draw it
@@ -194,7 +232,7 @@ class Stage {
 					this.actors[i].draw(context);
 				}
 			
-		
+			
 			
 			//console.log("Draw: " + stage.player.aim_pos);
 			}
@@ -240,6 +278,7 @@ class Stage {
 			}
 		}
 	}
+		
 	
 	
 
@@ -508,6 +547,7 @@ class Player extends Ball {
 		this.turret_pos.y = this.turret_pos.y * this.radius + this.y;
 		
 		
+		
 		context.beginPath(); 
 		context.arc(this.turret_pos.x, this.turret_pos.y, this.radius - 8, 0, 2 * Math.PI, false); 
 		context.stroke();
@@ -531,9 +571,11 @@ class Player extends Ball {
 		context.fillText(this.health, this.x, this.y+6);
 		
 		//Show player score
-		context.font = "20px Courier New";
+		context.font = "17px Courier New";
+		context.fillStyle = "black";
 		context.textAlign = "left";
-		context.fillText("Score: " + this.score, 10, 20);
+		context.fillText("Score: " + this.score, this.x - stage.view_width/2 + 10, 
+							this.y - stage.view_height/2 + 20);
 		
 		
 		
