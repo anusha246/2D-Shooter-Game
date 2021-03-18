@@ -42,7 +42,7 @@ app.use('/api/auth/login', function (req, res,next) {
 	console.log("login");
 
 	if (!req.headers.username || !req.headers.password) {
-		return res.status(403).json({ error: 'Please enter both a username and password' });
+		return res.status(403).json({ error: 'Please enter both a username and a password' });
   	}
 	try {
 		//Regex match the username and password to a valid username and password.
@@ -67,15 +67,15 @@ app.use('/api/auth/login', function (req, res,next) {
 		let sql = 'SELECT * FROM ftduser WHERE username=$1 and password=sha512($2)';
         	pool.query(sql, [username, password], (err, pgRes) => {
   			if (err){
-                		res.status(403).json({ error: 'Not authorized'});
+                		res.status(403).json({ error: 'Your username or password is incorrect.'});
 			} else if(pgRes.rowCount == 1){
 				next(); 
 			} else {
-                		res.status(403).json({ error: 'Not authorized'});
+                		res.status(403).json({ error: 'Your username or password is incorrect.'});
         		}
 		});
 	} catch(err) {
-               	res.status(403).json({ error: 'Not authorized'});
+               	res.status(403).json({ error: 'Your username or password is incorrect.'});
 	}
 });
 

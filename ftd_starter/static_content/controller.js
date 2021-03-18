@@ -160,7 +160,7 @@ function login(){
         }).done(function(data, text_status, jqXHR){
             
 			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
-			
+			setField('error', '', 'b', 0);
         	$("#ui_login").hide();
         	$("#ui_play").show();
 			$("#ui_nav").show();
@@ -169,6 +169,8 @@ function login(){
 			startGame();
 		
         }).fail(function(err){
+			setField('error', err.responseJSON.error, 'b', 0);
+			$("#errorMessage").show();
             console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
         }); 	
 		
@@ -208,6 +210,7 @@ function createAccount() {
 	}).done(function(data, text_status, jqXHR){
 		
 		console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+		setField('error', '', 'b', 0);
 		$("#ui_login").show();
 		$("#ui_play").hide();
 		$("#ui_instructions").hide();
@@ -217,7 +220,6 @@ function createAccount() {
 		$("#registerSubmit").show();
 
 	}).fail(function(err){
-		console.log('here');
 		setField('error', err.responseJSON.error, 'b', 0);
 		$("#errorMessage").show();
 		console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
