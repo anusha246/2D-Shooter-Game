@@ -129,33 +129,34 @@ function shootByMouse(event){
 }
 
 function login(){
+
 	credentials =  { 
 		"username": $("#username").val(), 
 		"password": $("#password").val() 
 	};
 		
         $.ajax({
-                method: "POST",
-                url: "/api/auth/login",
-                data: JSON.stringify({}),
-				headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
-				"Password" : btoa(credentials.password) },
-				//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
-                processData:false,
-                contentType: "application/json; charset=utf-8",
-                dataType:"json"
+
+			method: "POST",
+			url: "/api/auth/login",
+			data: JSON.stringify({}),
+			headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
+			"Password" : btoa(credentials.password) },
+			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+			processData:false,
+			contentType: "application/json; charset=utf-8",
+			dataType:"json"
+
         }).done(function(data, text_status, jqXHR){
-                console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
-		
+            
+			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
         	$("#ui_login").hide();
         	$("#ui_play").show();
 			$("#ui_play").hide();
 			$("#ui_nav").show();
+			setupGame();
+			startGame();
 
-		setupGame();
-		startGame();
-
-		
         }).fail(function(err){
                 console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
         }); 	
@@ -201,7 +202,6 @@ function createAccount() {
         }).fail(function(err){
                 console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
         }); 	
-
 }
 function play(){
 	credentials =  { 
@@ -232,49 +232,142 @@ function play(){
 	}).fail(function(err){
 		console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
 	}); 
-
-	
-
-
 }
 
 function instructions(){
-	$("#ui_login").hide();
-	$("#ui_play").hide();
-	$("#ui_instructions").show();
-	$("#ui_stats").hide();
-	$("#ui_profile").hide();
-	pausedGame = true;
 
+	credentials =  { 
+		"username": $("#username").val(), 
+		"password": $("#password").val() 
+	};
+	console.log(credentials);
+
+	$.ajax({
+
+		method: "POST",
+		url: "/api/auth/login",
+		data: JSON.stringify({}),
+		headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
+		"Password" : btoa(credentials.password) },
+		processData:false,
+		contentType: "application/json; charset=utf-8",
+		dataType:"json"
+
+	}).done(function(data, text_status, jqXHR){
+
+		console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+		$("#ui_login").hide();
+		$("#ui_play").hide();
+		$("#ui_instructions").show();
+		$("#ui_stats").hide();
+		$("#ui_profile").hide();
+		pausedGame = true;
+
+	}).fail(function(err){
+		console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+	}); 
 }
 
 function stats(){
-	$("#ui_login").hide();
-	$("#ui_play").hide();
-	$("#ui_instructions").hide();
-	$("#ui_stats").show();
-	$("#ui_profile").hide();
-	pausedGame = true;
 
+	credentials =  { 
+		"username": $("#username").val(), 
+		"password": $("#password").val() 
+	};
+	console.log(credentials);
+
+	$.ajax({
+
+		method: "POST",
+		url: "/api/auth/login",
+		data: JSON.stringify({}),
+		headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
+		"Password" : btoa(credentials.password) },
+		processData:false,
+		contentType: "application/json; charset=utf-8",
+		dataType:"json"
+
+	}).done(function(data, text_status, jqXHR){
+
+		console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+		$("#ui_login").hide();
+		$("#ui_play").hide();
+		$("#ui_instructions").hide();
+		$("#ui_stats").show();
+		$("#ui_profile").hide();
+		pausedGame = true;
+
+	}).fail(function(err){
+		console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+	}); 
 }
 
 function profile(){
-	$("#ui_login").hide();
-	$("#ui_play").hide();
-	$("#ui_instructions").hide();
-	$("#ui_stats").hide();
-	$("#ui_profile").show();
-	pausedGame = true;
+
+	credentials =  { 
+		"username": $("#username").val(), 
+		"password": $("#password").val() 
+	};
+	console.log(credentials);
+
+	$.ajax({
+
+		method: "POST",
+		url: "/api/auth/login",
+		data: JSON.stringify({}),
+		headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
+		"Password" : btoa(credentials.password) },
+		processData:false,
+		contentType: "application/json; charset=utf-8",
+		dataType:"json"
+
+	}).done(function(data, text_status, jqXHR){
+
+		console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+		$("#ui_login").hide();
+		$("#ui_play").hide();
+		$("#ui_instructions").hide();
+		$("#ui_stats").hide();
+		$("#ui_profile").show();
+		pausedGame = true;
+
+	}).fail(function(err){
+		console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+	}); 
+
 
 }
 function logout(){
-	$("#ui_nav").hide();
-	$("#ui_login").show();
-	$("#ui_play").hide();
-	$("#ui_instructions").hide();
-	$("#ui_stats").hide();
-	$("#ui_profile").hide();
-	pausedGame = true;
+
+	credentials =  { 
+		"username": $("#username").val(), 
+		"password": $("#password").val() 
+	};
+	console.log(credentials);
+
+	$.ajax({
+		method: "POST",
+		url: "/api/auth/login",
+		data: JSON.stringify({}),
+		headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
+		"Password" : btoa(credentials.password) },
+		processData:false,
+		contentType: "application/json; charset=utf-8",
+		dataType:"json"
+	}).done(function(data, text_status, jqXHR){
+
+		console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+		$("#ui_nav").hide();
+		$("#ui_login").show();
+		$("#ui_play").hide();
+		$("#ui_instructions").hide();
+		$("#ui_stats").hide();
+		$("#ui_profile").hide();
+		pausedGame = true;
+
+	}).fail(function(err){
+		console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+	}); 
 }
 // Using the /api/auth/test route, must send authorization header
 function test(){
