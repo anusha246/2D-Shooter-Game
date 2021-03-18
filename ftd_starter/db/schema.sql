@@ -6,7 +6,8 @@ CREATE TABLE ftduser (
 	password BYTEA NOT NULL,
 	email VARCHAR(78) NOT NULL, -- Why 78? See: https://tools.ietf.org/html/rfc6532, section 3.4
 	firstName VARCHAR (20) NOT NULL,
-	lastName VARCHAR (20) NOT NULL
+	lastName VARCHAR (20) NOT NULL,
+	score NUMERIC (20)
 	
 );
 --- Could have also stored as 128 character hex encoded values

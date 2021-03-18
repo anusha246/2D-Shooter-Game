@@ -195,7 +195,7 @@ function createAccount() {
 	};
 		
 	$.ajax({
-
+		
 		method: "POST",
 		url: "/api/register",
 		data: JSON.stringify({}),
@@ -265,12 +265,52 @@ function stats(){
 function profile(){
 
 	if (loggedIn) {
-		$("#ui_login").hide();
-		$("#ui_play").hide();
-		$("#ui_instructions").hide();
-		$("#ui_stats").hide();
-		$("#ui_profile").show();
-		pausedGame = true;
+
+		credentials =  { 
+			"username": $("#username").val(), 
+		};
+			
+		$.ajax({
+	
+			method: "GET",
+			url: "/api/auth/profile",
+			data: JSON.stringify({}),
+			headers: { "GET": "Profile information", "Username" : btoa(credentials.username) },
+			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+			processData:false,
+			contentType: "application/json; charset=utf-8",
+			dataType:"json"
+	
+		}).done(function(data, text_status, jqXHR){
+			
+			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+			
+			updateField('ui_profile', data.username, 'b', 0);
+			updateField('ui_profile', data.email, 'b', 2);
+			updateField('ui_profile', data.firstname, 'b', 3);
+			updateField('ui_profile', data.lastname, 'b', 4);
+			if (!data.score) {
+				updateField('ui_profile', 0, 'b', 5);
+			}
+			else {
+				updateField('ui_profile', data.score, 'b', 5);
+			}
+			//updateField('ui_profile', JSON.stringify(data), 'b', 0);
+			$("#ui_login").hide();
+			$("#ui_play").hide();
+			$("#ui_instructions").hide();
+			$("#ui_stats").hide();
+			$("#ui_profile").show();
+			pausedGame = true;
+	
+		}).fail(function(err){
+			setField('error', err.responseJSON.error, 'b', 0);
+			$("#errorMessage").show();
+			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+	
+		}); 	
+		console.log('there');
+
 	} 
 
 }
@@ -284,6 +324,11 @@ function logout(){
 	$("#ui_profile").hide();
 	loggedIn = false;
 
+}
+function updateField(field, message, tag, index) {
+	var getDiv = document.getElementById(field);
+	var setTag = getDiv.getElementsByTagName(tag)[index];
+	setTag.innerHTML += message;
 }
 function setField(field, message, tag, index) {
 	var getDiv = document.getElementById(field);
