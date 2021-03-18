@@ -127,20 +127,15 @@ function shootByMouse(event){
 			var bullet_pos_x = stage.player.turret_pos.x;
 			var bullet_pos_y = stage.player.turret_pos.y + 1;
 			
-			stage.addActor(new Bullet(stage, new Pair(bullet_pos_x, bullet_pos_y), 
-										new Pair(0, 0), 'rgba(0,255,0,1)', 3, 0, "Player"));
-										
-			//console.log(new Pair(bullet_pos_x, bullet_pos_y));
-		
-			stage.getActor(Math.round(bullet_pos_x), 
-							Math.round(bullet_pos_y)).headTo(mouse_pos);
+			stage.addActor(new Bullet(stage, new Pair(bullet_pos_x, bullet_pos_y), mouse_pos,
+										new Pair(0, 0), 'rgba(0,255,0,1)', 3, "Player", 
+										stage.player.gunType));
+							
 			
 			stage.player.ammo--;
 		}
 	}
 	
-	//stage.addActor(new Bullet(stage, mouse_pos, new Pair(0, 0), 'rgba(0,0,0,1)', 7));
-	//Player(stage, mouse_pos, new Pair(0, 0), 'rgba(0,0,0,1)', 20));
 }
 
 function login(){
@@ -165,6 +160,7 @@ function login(){
         }).done(function(data, text_status, jqXHR){
             
 			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+			
         	$("#ui_login").hide();
         	$("#ui_play").show();
 			$("#ui_play").hide();
@@ -172,10 +168,11 @@ function login(){
 			loggedIn = true;
 			setupGame();
 			startGame();
-
+		
         }).fail(function(err){
             console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
         }); 	
+		
 
 }
 function register() {

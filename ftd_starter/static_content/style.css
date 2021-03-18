@@ -6,3 +6,15 @@ a {
     color:blue;
     text-decoration: underline;
 }
+
+#pistolText {
+	color: blue;
+}
+
+#sniperText {
+	color: yellow;
+}
+
+#shotgunText {
+	color: red;
+}

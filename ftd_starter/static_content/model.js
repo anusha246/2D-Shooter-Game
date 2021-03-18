@@ -27,6 +27,7 @@ class Stage {
 		var turret_pos = new Pair(Math.floor(this.width/2), Math.floor(this.height/2) - radius);
 		var health = 10;
 		var ammo = 10;
+		var gunType = "Pistol";
 		
 		
 		//Create opponents
@@ -44,7 +45,7 @@ class Stage {
 			
 			this.addActor(new Opponent(this, opponent_pos, velocity, colour, 
 										radius, aim_pos, turret_pos, health, ammo, 
-										move_time));
+										move_time, gunType));
 		}
 		
 		//Create player
@@ -54,7 +55,7 @@ class Stage {
 		
 		this.score = score;
 		this.addPlayer(new Player(this, this.midPosition, velocity, colour, radius, 
-									aim_pos, turret_pos, health, ammo, score));
+									aim_pos, turret_pos, health, ammo, score, gunType));
 		
 		
 		
@@ -104,9 +105,9 @@ class Stage {
 						shouldStep = false;
 						if (this.actors[i].constructor.name == "Bullet" &&
 							this.actors[j].constructor.name != "Box" &&
-							this.actors[i].type != this.actors[j].constructor.name){
+							this.actors[i].shotFrom != this.actors[j].constructor.name){
 							
-							if (this.player && this.actors[i].type == "Player") {
+							if (this.player && this.actors[i].shotFrom == "Player") {
 								this.player.score++;
 							}
 						}
@@ -129,13 +130,13 @@ class Stage {
 				
 			}
 			
-			//If Bullet, increase time by 1
+			//If Bullet, decrease lifetime by 1
 			if ((this.actors[i].constructor.name) == "Bullet"){
-				this.actors[i].time += 1;
+				this.actors[i].lifetime -= 1;
 				
 				
-				//If Bullet's time reaches or exceeds 450, delete it
-				if (this.actors[i].time >= 450){
+				//If Bullet's lifetime reaches 0, delete it
+				if (this.actors[i].lifetime <= 0){
 					this.removeActor(this.actors[i]);
 				}
 			}
@@ -220,9 +221,6 @@ class Stage {
 			
 			context.fillStyle = 'rgba(0,0,0,1)';
 			context.strokeRect(0, 0, this.width, this.height);
-			//context.fillRect(-this.view_width, -this.view_height, 
-			//		this.width+this.view_width + this.view_width, this.height+this.view_height + this.view_height);
-			
 			
 			
 			for(var i=0;i<this.actors.length;i++){
@@ -270,9 +268,23 @@ class Stage {
 				var colour= 'rgba('+red+','+green+','+blue+','+0.75+')';
 				var position = new Pair(x,y);
 				var health = 3;
+				var type = "Ammo";
 				
 				//var b = new Ball(this, position, velocity, colour, radius);
-				var b = new Box(this, position, colour, width, height, health);
+				var gunSpawn = Math.floor(Math.random()*10);
+				if (gunSpawn == 0){
+					type = "Pistol";
+					health = 100;
+				} else if (gunSpawn == 1){
+					type = "Sniper";
+					health = 100;
+				} else if (gunSpawn == 2){
+					type = "Shotgun";
+					health = 100;
+				}
+					
+				 
+				var b = new Box(this, position, colour, width, height, health, type);
 				this.addActor(b);
 				numBoxes--;
 			}
@@ -298,10 +310,15 @@ class Pair {
 		this.x=this.x/magnitude;
 		this.y=this.y/magnitude;
 	}
+	
+	multiply(num){
+		this.x = this.x * num;
+		this.y = this.y * num;
+	}
 }
 
 class Box {
-	constructor(stage, position, colour, width, height, health){
+	constructor(stage, position, colour, width, height, health, type){
 		this.stage = stage;
 		this.position=position;
 		this.intPosition(); // this.x, this.y are int version of this.position
@@ -310,6 +327,15 @@ class Box {
 		this.width = width;
 		this.height = height;
 		this.health = health;
+		this.type = type;
+		
+		if (this.type == "Pistol"){
+			this.colour = "blue";
+		} else if (this.type == "Sniper"){
+			this.colour = "yellow";
+		} else if (this.type == "Shotgun"){
+			this.colour = "red";
+		}
 	}
 	
 	toString(){
@@ -329,9 +355,12 @@ class Box {
 		context.font = "15px Courier New";
 		context.fillStyle = "black";
 		context.textAlign = "center";
-		context.fillText(this.health, this.x+this.width/2, this.y+this.height/2+4);
+		if (this.type == "Ammo"){
+			context.fillText(this.health, this.x+this.width/2, this.y+this.height/2+4);
+		}
 	}
 }
+
 
 class Ball {
 	constructor(stage, position, velocity, colour, radius){
@@ -365,7 +394,7 @@ class Ball {
 				
 				if (this.constructor.name == "Bullet"){
 					object.health--;
-					this.time = 450;
+					this.lifetime = 0;
 				
 				//Actor is a Player or Opponent, pickup ammo capped at 10
 				} else {
@@ -374,6 +403,11 @@ class Ball {
 					this.ammo += object.health;
 					if (this.ammo > 10){
 						this.ammo = 10;
+					}
+					
+					//If Box is Sniper or Pistol box
+					if (object.type != "Ammo"){
+						this.gunType = object.type;
 					}
 					
 					object.health = 0;
@@ -401,18 +435,18 @@ class Ball {
 						
 						if (object.constructor.name == "Bullet"){
 							
-							if (this.type != object.type){
-								object.time = 450;
+							if (this.shotFrom != object.shotFrom){
+								object.lifetime = 0;
 							} else {
 								return true;
 							}
 							
 						//If bullet was not shot from object
-						} else if (object.constructor.name != this.type){
+						} else if (object.constructor.name != this.shotFrom){
 							console.log(object.constructor.name);
-							console.log(this.type);
+							console.log(this.shotFrom);
 							object.health--;
-							this.time = 450;
+							this.lifetime = 0;
 						} else {
 							return true;
 						}
@@ -436,44 +470,7 @@ class Ball {
 		
 		this.position.x=this.position.x+this.velocity.x;
 		this.position.y=this.position.y+this.velocity.y;
-		
-		/*
-		if (object.constructor.name == "Box"){
-			if (this.position.x >= object.position.x && 
-				this.position.x <= object.position.x + object.width &&
-				this.position.y >= object.position.y &&
-				this.position.y <= object.position.y + object.height){
-				
-				
-			} else {
-				this.position.x=this.position.x+this.velocity.x;
-				this.position.y=this.position.y+this.velocity.y;
-			}
-		}
-		*/
 			
-		
-		/*
-		if (object.constructor.name == "Bullet"){
-			
-			if(this.position.x<object.position.x){
-				this.position.x=0;
-				this.velocity.x=Math.abs(this.velocity.x);
-			}
-			if(this.position.x>this.stage.width){
-				this.position.x=this.stage.width;
-				this.velocity.x=-Math.abs(this.velocity.x);
-			}
-			if(this.position.y<0){
-				this.position.y=0;
-				this.velocity.y=Math.abs(this.velocity.y);
-			}
-			if(this.position.y>this.stage.height){
-				this.position.y=this.stage.height;
-				this.velocity.y=-Math.abs(this.velocity.y);
-			}
-		}
-		*/
 			
 		// bounce off the walls
 		if(this.position.x<0){
@@ -514,7 +511,8 @@ class Ball {
 
 class Player extends Ball {
 	
-	constructor(stage, position, velocity, colour, radius, aim_pos, turret_pos, health, ammo, score){
+	constructor(stage, position, velocity, colour, radius, aim_pos, 
+				turret_pos, health, ammo, score, gunType){
 		
 		super(stage, position, velocity, colour, radius);
 		
@@ -523,6 +521,7 @@ class Player extends Ball {
 		this.health = health;
 		this.ammo = ammo;
 		this.score = score;
+		this.gunType = gunType;
 	}
 	
 	draw(context){
@@ -534,9 +533,7 @@ class Player extends Ball {
 		context.rotate(80 * Math.PI / 180);
 		*/
 		
-		//Set stroke, fill colors
-		context.fillStyle = this.colour;
-		context.strokeStyle = this.colour;
+		
 		
 		//Draw turret
 		this.turret_pos.x=(this.aim_pos.x - this.x);
@@ -546,12 +543,28 @@ class Player extends Ball {
 		this.turret_pos.x = this.turret_pos.x * this.radius + this.x;
 		this.turret_pos.y = this.turret_pos.y * this.radius + this.y;
 		
-		
+		//Set turret colour based on gunType
+		if (this.gunType == "Pistol"){
+			context.fillStyle = "blue";
+			context.strokeStyle = "blue"; 
+		} else if (this.gunType == "Sniper"){
+			context.fillStyle = "yellow";
+			context.strokeStyle = "yellow";
+			
+		//Shotgun
+		} else {
+			context.fillStyle = "red";
+			context.strokeStyle = "red";
+		}
 		
 		context.beginPath(); 
 		context.arc(this.turret_pos.x, this.turret_pos.y, this.radius - 8, 0, 2 * Math.PI, false); 
 		context.stroke();
 		context.fill();
+		
+		//Set stroke, fill colors
+		context.fillStyle = this.colour;
+		context.strokeStyle = this.colour;
 		
 		//Draw main body
 		context.beginPath(); 
@@ -588,7 +601,7 @@ class Player extends Ball {
 class Opponent extends Ball {
 	
 	constructor(stage, position, velocity, colour, radius, aim_pos, 
-				turret_pos, health, ammo, move_time){
+				turret_pos, health, ammo, move_time, gunType){
 				
 		super(stage, position, velocity, colour, radius);
 		
@@ -598,6 +611,7 @@ class Opponent extends Ball {
 		this.ammo = ammo;
 		
 		this.move_time = move_time;
+		this.gunType = gunType;
 	}
 	
 	attack(){
@@ -626,12 +640,10 @@ class Opponent extends Ball {
 				var bullet_pos_y = this.turret_pos.y + 1;
 				
 				this.stage.addActor(new Bullet(this.stage, new Pair(bullet_pos_x, bullet_pos_y), 
-											new Pair(0, 0), 'rgba(255,0,0,1)', 3, 0, 
-											"Opponent"));
+											this.stage.player.position, new Pair(0, 0), 
+											'rgba(255,0,0,1)', 3,
+											"Opponent", this.gunType));
 											
-			
-				this.stage.getActor(Math.round(bullet_pos_x), 
-								Math.round(bullet_pos_y)).headTo(this.stage.player.position);
 				
 				this.ammo--;
 				
@@ -645,10 +657,6 @@ class Opponent extends Ball {
 	
 	draw(context){
 		
-		//Set stroke, fill colors
-		context.fillStyle = this.colour;
-		context.strokeStyle = this.colour;
-		
 		//Draw turret
 		//console.log(this.aim_pos);
 		
@@ -660,10 +668,29 @@ class Opponent extends Ball {
 		this.turret_pos.y = this.turret_pos.y * this.radius + this.y;
 		
 		this.attack();
+		
+		//Set turret colour based on gunType
+		if (this.gunType == "Pistol"){
+			context.fillStyle = "blue";
+			context.strokeStyle = "blue"; 
+		} else if (this.gunType == "Sniper"){
+			context.fillStyle = "yellow";
+			context.strokeStyle = "yellow";
+			
+		//Shotgun
+		} else {
+			context.fillStyle = "red";
+			context.strokeStyle = "red";
+		}
+			
 		context.beginPath(); 
 		context.arc(this.turret_pos.x, this.turret_pos.y, this.radius - 8, 0, 2 * Math.PI, false); 
 		context.stroke();
 		context.fill();
+		
+		//Set stroke, fill colors
+		context.fillStyle = this.colour;
+		context.strokeStyle = this.colour;
 		
 		//Draw main body
 		context.beginPath(); 
@@ -689,11 +716,47 @@ class Opponent extends Ball {
 }
 
 class Bullet extends Ball {
-	constructor(stage, position, velocity, colour, radius, time, type){
+	constructor(stage, position, aim_pos, velocity, colour, radius, 
+				shotFrom, type){
 		super(stage, position, velocity, colour, radius);
 		
-		this.time = time;
+		this.lifetime = 100;
+		this.shotFrom = shotFrom;
 		this.type = type;
+		this.aim_pos = aim_pos;
+		this.headTo(this.aim_pos);
+		this.velocity.multiply(2);
+		
+		if (type == "Sniper"){
+			this.lifetime = this.lifetime*2;
+			this.velocity.multiply(4);
+			
+		} else if (type == "Shotgun"){
+			//Create two more bullets
+			var displacement = 300;
+			
+			//Getting arc coordinates code from
+			//https://stackoverflow.com/questions/12342102/html5-get-coordinates-of-arcs-end
+			this.stage.addActor(new Bullet(this.stage, 
+									new Pair(this.position.x+Math.cos(45*Math.PI/180)*3,
+											this.position.y+Math.sin(45*Math.PI/180)*3), 
+									new Pair(this.aim_pos.x+Math.cos(45*Math.PI/180)*100,
+											this.aim_pos.y+Math.sin(45*Math.PI/180)*100),
+									new Pair(0, 0), this.colour, this.radius, this.shotFrom, 
+									"Shotgun extra"));
+			
+			this.stage.addActor(new Bullet(this.stage, 
+									new Pair(this.position.x-Math.cos(45*Math.PI/180)*3,
+											this.position.y-Math.sin(45*Math.PI/180)*3),
+									new Pair(this.aim_pos.x-Math.cos(45*Math.PI/180)*100,
+											this.aim_pos.y-Math.sin(45*Math.PI/180)*100),
+									new Pair(0, 0), this.colour, this.radius, this.shotFrom, 
+									"Shotgun extra"));
+			
+		
+		} else if (type == "Pistol"){
+			this.velocity.multiply(2);
+		}
 	}
 	
 	draw(context){
