@@ -39,19 +39,32 @@ app.post('/api/test', function (req, res) {
  * Authorization: Basic " + btoa("arnold:spiderman"); in javascript
 **/
 app.use('/api/auth/login', function (req, res,next) {
-	console.log("ah");
-	if (!req.headers.authorization) {
-		return res.status(403).json({ error: 'No credentials sent!' });
+	console.log("login");
+
+	if (!req.headers.username || !req.headers.password) {
+		return res.status(403).json({ error: 'Please enter both a username and password' });
   	}
 	try {
-		// var credentialsString = Buffer.from(req.headers.authorization.split(" ")[1], 'base64').toString();
-		var m = /^Basic\s+(.*)$/.exec(req.headers.authorization);
+		//Regex match the username and password to a valid username and password.
+		//That is, usernames are only digits and alphabet letters. Passwords are special characters & letters. 
+		var u = /(([\w]|[\W])*)$/.exec(req.headers.username);
+		var uname = Buffer.from(u[1], 'base64').toString()
+		u = /(([\w])*)$/.exec(uname) //Only A-Z, a-z, 0-9, and the underscore
+		var p = /(([\w]|[\W])*)$/.exec(req.headers.password);
+		var pword = Buffer.from(p[1], 'base64').toString()
+		p = /(([\w]|[\W])*)$/.exec(pword) //Alphabet, digits, and any special character
 
-		var user_pass = Buffer.from(m[1], 'base64').toString()
-		m = /^(.*):(.*)$/.exec(user_pass); // probably should do better than this
+		console.log(u)
 
-		var username = m[1];
-		var password = m[2];
+		//m = /^(.*):(.*)$/.exec(user_pass); // probably should do better than this
+		
+		console.log(u)
+
+		
+		console.log(p)
+		
+		var username = u[1];
+		var password = p[1];
 
 		console.log(username+" "+password);
 

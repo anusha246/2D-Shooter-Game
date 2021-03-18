@@ -138,7 +138,9 @@ function login(){
                 method: "POST",
                 url: "/api/auth/login",
                 data: JSON.stringify({}),
-				headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+				headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
+				"Password" : btoa(credentials.password) },
+				//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
                 processData:false,
                 contentType: "application/json; charset=utf-8",
                 dataType:"json"
@@ -178,7 +180,8 @@ function createAccount() {
                 method: "POST",
                 url: "/api/register",
                 data: JSON.stringify({}),
-				headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+				headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
+				"Password" : btoa(credentials.password) },
                 processData:false,
                 contentType: "application/json; charset=utf-8",
                 dataType:"json"
@@ -201,11 +204,36 @@ function createAccount() {
 
 }
 function play(){
-	$("#ui_login").hide();
-	$("#ui_play").show();
-	$("#ui_instructions").hide();
-	$("#ui_stats").hide();
-	$("#ui_profile").hide();
+	credentials =  { 
+		"username": $("#username").val(), 
+		"password": $("#password").val() 
+	};
+	console.log(credentials);
+
+	$.ajax({
+		method: "POST",
+		url: "/api/auth/login",
+		data: JSON.stringify({}),
+		headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
+		"Password" : btoa(credentials.password) },
+		processData:false,
+		contentType: "application/json; charset=utf-8",
+		dataType:"json"
+	}).done(function(data, text_status, jqXHR){
+		console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+
+		$("#ui_login").hide();
+		$("#ui_play").show();
+		$("#ui_instructions").hide();
+		$("#ui_stats").hide();
+		$("#ui_profile").hide();
+
+
+	}).fail(function(err){
+		console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+	}); 
+
+	
 
 
 }
