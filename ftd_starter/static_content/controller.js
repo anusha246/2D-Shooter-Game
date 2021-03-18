@@ -144,14 +144,14 @@ function login(){
 		"username": $("#username").val(), 
 		"password": $("#password").val() 
 	};
-		/*
+		
         $.ajax({
 
 			method: "POST",
 			url: "/api/auth/login",
 			data: JSON.stringify({}),
-			headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
-			"Password" : btoa(credentials.password) },
+			headers: { "Authorization": "Basic", "username" : btoa(credentials.username), 
+			"password" : btoa(credentials.password) },
 			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
 			processData:false,
 			contentType: "application/json; charset=utf-8",
@@ -160,7 +160,9 @@ function login(){
         }).done(function(data, text_status, jqXHR){
             
 			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
-			*/
+			
+			setField('error', '', 'b', 0);
+			
 			$("#body").show();
         	$("#ui_login").hide();
         	$("#ui_play").show();
@@ -168,11 +170,13 @@ function login(){
 			loggedIn = true;
 			setupGame();
 			startGame();
-		/*
+		
         }).fail(function(err){
+			setField('error', err.responseJSON.error, 'b', 0);
+			$("#errorMessage").show();
             console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
         }); 	
-		*/
+		
 
 }
 function register() {
@@ -194,13 +198,13 @@ function createAccount() {
 	};
 		
 	$.ajax({
-
+		
 		method: "POST",
 		url: "/api/register",
 		data: JSON.stringify({}),
-		headers: { "Authorization": "Basic", "Username" : btoa(credentials.username), 
-		"Password" : btoa(credentials.password), "Email" : btoa(credentials.email),
-		"FirstName" : btoa(credentials.firstname), "LastName" : btoa(credentials.lastname) },
+		headers: { "Authorization": "Basic", "username" : btoa(credentials.username), 
+		"password" : btoa(credentials.password), "email" : btoa(credentials.email),
+		"firstName" : btoa(credentials.firstname), "lastName" : btoa(credentials.lastname) },
 		//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
 		processData:false,
 		contentType: "application/json; charset=utf-8",
@@ -209,6 +213,7 @@ function createAccount() {
 	}).done(function(data, text_status, jqXHR){
 		
 		console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+		setField('error', '', 'b', 0);
 		$("#ui_login").show();
 		$("#ui_play").hide();
 		$("#ui_instructions").hide();
@@ -218,13 +223,11 @@ function createAccount() {
 		$("#registerSubmit").show();
 
 	}).fail(function(err){
-		console.log('here');
 		setField('error', err.responseJSON.error, 'b', 0);
 		$("#errorMessage").show();
 		console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
 
 	}); 	
-	console.log('there');
 }
 function play(){
 
@@ -301,12 +304,54 @@ function stats(){
 function profile(){
 
 	if (loggedIn) {
-		$("#ui_login").hide();
-		$("#ui_play").hide();
-		$("#ui_instructions").hide();
-		$("#ui_stats").hide();
-		$("#ui_profile").show();
-		pausedGame = true;
+
+		credentials =  { 
+			"username": $("#username").val(), 
+		};
+		
+		$.ajax({
+	
+			method: "GET",
+			url: "/api/auth/profile",
+			data: JSON.stringify({}),
+			headers: { "GET": "Profile information", "username" : btoa(credentials.username) },
+			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+			processData:false,
+			contentType: "application/json; charset=utf-8",
+			dataType:"json"
+	
+		}).done(function(data, text_status, jqXHR){
+			
+			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+			
+			setField('ui_profile', "Username: " + data.username, 'b', 0);
+			setField('ui_profile', "Email: " + data.email, 'b', 2);
+			setField('ui_profile', "First Name: " + data.firstname, 'b', 3);
+			setField('ui_profile', "Last Name: " + data.lastname, 'b', 4);
+			if (!data.score) {
+				setField('ui_profile', "Score: 0", 'b', 5);
+			}
+			else {
+				setField('ui_profile', "Score: " + data.score, 'b', 5);
+			}
+			//updateField('ui_profile', JSON.stringify(data), 'b', 0);
+			
+			
+			$("#ui_login").hide();
+			$("#ui_play").hide();
+			$("#ui_instructions").hide();
+			$("#ui_stats").hide();
+			$("#ui_profile").show();
+			pausedGame = true;
+		
+		}).fail(function(err){
+			setField('error', err.responseJSON.error, 'b', 0);
+			$("#errorMessage").show();
+			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+	
+		}); 	
+		
+
 	} 
 
 }
@@ -321,6 +366,178 @@ function logout(){
 	$("#body").hide();
 	loggedIn = false;
 
+}
+function updateScore(score) {
+	if (loggedIn) {
+		credentials =  { 
+			"username": $("#username").val(), 
+		};
+
+		$.ajax({
+
+			method: "PUT",
+			url: "/api/auth/updateScore",
+			data: JSON.stringify({}),
+			headers: { "PUT": "Score information", "username" : btoa(credentials.username), "score" : score },
+			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+			processData:false,
+			contentType: "application/json; charset=utf-8",
+			dataType:"json"
+
+		}).done(function(data, text_status, jqXHR){
+			
+			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+			
+			if (!data.score) {
+				setField('ui_profile', "Score: 0", 'b', 5);
+			}
+			else {
+				setField('ui_profile', "Score: " + data.score, 'b', 5);
+			}
+			//updateField('ui_profile', JSON.stringify(data), 'b', 0);
+			$("#ui_login").hide();
+			$("#ui_play").show();
+			$("#ui_instructions").hide();
+			$("#ui_stats").hide();
+			$("#ui_profile").hide();
+
+		}).fail(function(err){
+			setField('error', err.responseJSON.error, 'b', 0);
+			$("#errorMessage").show();
+			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+
+		}); 	
+	}
+}
+function changeUsername() {
+	if (loggedIn) {
+		credentials =  { 
+			"oldusername": $("#username").val(), 
+			"username": $("#changeUsername").val(), 
+		};
+			
+		$.ajax({
+
+			method: "PUT",
+			url: "/api/auth/updateUsername",
+			data: JSON.stringify({}),
+			headers: { "PUT": "New username", "username" : btoa(credentials.username), 
+			"oldUsername" : btoa(credentials.oldusername) },
+			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+			processData:false,
+			contentType: "application/json; charset=utf-8",
+			dataType:"json"
+
+		}).done(function(data, text_status, jqXHR){
+			
+			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+			
+
+			setField('ui_profile', "Username: " + data.username, 'b', 0);
+			resetField('changeUsername');
+			var getUser = document.getElementById('username');
+			getUser.value = data.username;
+			$("#ui_login").hide();
+			$("#ui_play").hide();
+			$("#ui_instructions").hide();
+			$("#ui_stats").hide();
+			$("#ui_profile").show();
+			pausedGame = true;
+
+		}).fail(function(err){
+			setField('error', err.responseJSON.error, 'b', 0);
+			$("#errorMessage").show();
+			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+
+		}); 	
+	}
+}
+function deleteUser() {
+	if (loggedIn) {
+		credentials =  { 
+			"username": $("#username").val(), 
+		};
+			
+		$.ajax({
+
+			method: "DELETE",
+			url: "/api/auth/delete",
+			data: JSON.stringify({}),
+			headers: { "DELETE": "delete user", "username" : btoa(credentials.username) },
+			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+			processData:false,
+			contentType: "application/json; charset=utf-8",
+			dataType:"json"
+
+		}).done(function(data, text_status, jqXHR){
+			
+			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+			
+			setField('error', data.message, 'b', 0);
+
+
+			resetField('username');
+			$("#ui_login").show();
+			$("#ui_play").hide();
+			$("#ui_instructions").hide();
+			$("#ui_stats").hide();
+			$("#ui_profile").hide();
+			$("#ui_nav").hide();
+
+			pausedGame = true;
+
+		}).fail(function(err){
+			setField('error', err.responseJSON.error, 'b', 0);
+			$("#errorMessage").show();
+			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+
+		}); 	
+	}
+}
+function changeEmail() {
+	if (loggedIn) {
+		credentials =  { 
+			"username": $("#username").val(), 
+			"email": $("#changeEmail").val(), 
+		};
+			
+		$.ajax({
+
+			method: "PUT",
+			url: "/api/auth/updateEmail",
+			data: JSON.stringify({}),
+			headers: { "PUT": "New email", "username" : btoa(credentials.username), 
+			"email" : btoa(credentials.email) },
+			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+			processData:false,
+			contentType: "application/json; charset=utf-8",
+			dataType:"json"
+
+		}).done(function(data, text_status, jqXHR){
+			
+			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+			
+			resetField('changeEmail');
+			setField('ui_profile', "Email: " + data.email, 'b', 2);
+			$("#ui_login").hide();
+			$("#ui_play").hide();
+			$("#ui_instructions").hide();
+			$("#ui_stats").hide();
+			$("#ui_profile").show();
+			pausedGame = true;
+
+		}).fail(function(err){
+			setField('error', err.responseJSON.error, 'b', 0);
+			$("#errorMessage").show();
+			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+
+		}); 	
+	}
+}
+function updateField(field, message, tag, index) {
+	var getDiv = document.getElementById(field);
+	var setTag = getDiv.getElementsByTagName(tag)[index];
+	setTag.innerHTML += message;
 }
 function setField(field, message, tag, index) {
 	var getDiv = document.getElementById(field);
@@ -356,12 +573,17 @@ $(function(){
 		$("#statsButton").on('click',function(){ stats(); });
 		$("#profileButton").on('click',function(){ profile(); });
 		$("#logoutButton").on('click',function(){ logout(); });
+
 		
 		$("#goalSideButton").on('click',function(){ goal(); });
 		$("#controlsSideButton").on('click',function(){ controls(); });
 		$("#gunTypesSideButton").on('click',function(){ gunTypes(); });
 		
 		
+		$("#changeUsernameButton").on('click',function(){ changeUsername(); });
+		$("#changeEmailButton").on('click',function(){ changeEmail(); });
+		$("#deleteUserButton").on('click',function(){ deleteUser(); });
+
         $("#ui_nav").hide();
 		$("#body").hide();
 		$("#ui_login").show();
@@ -370,6 +592,7 @@ $(function(){
 		$("#ui_instructions").hide();
 		$("#ui_stats").hide();
 		$("#ui_profile").hide();
+
 		
 });
 

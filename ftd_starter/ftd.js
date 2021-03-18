@@ -40,24 +40,26 @@ app.post('/api/test', function (req, res) {
 **/
 app.use('/api/auth/login', function (req, res,next) {
 	console.log("login");
-
+	console.log(req.method);
+	if (!req.method || req.method != "POST") {
+		return res.status(403).json({ error: 'Invalid method type, please use POST for login' });
+	}
 	if (!req.headers.username || !req.headers.password) {
-		return res.status(403).json({ error: 'Please enter both a username and password' });
+		return res.status(403).json({ error: 'Please enter both a username and a password' });
   	}
 	try {
 		//Regex match the username and password to a valid username and password.
 		//That is, usernames are only digits and alphabet letters. Passwords are special characters & letters. 
 		var u = /(([\w]|[\W])*)$/.exec(req.headers.username);
-		var uname = Buffer.from(u[1], 'base64').toString()
+		var uname = Buffer.from(u[1], 'base64').toString();
 		u = /(([\w])*)$/.exec(uname) //Only A-Z, a-z, 0-9, and the underscore
 		var p = /(([\w]|[\W])*)$/.exec(req.headers.password);
-		var pword = Buffer.from(p[1], 'base64').toString()
-		p = /(([\w]|[\W])*)$/.exec(pword) //Alphabet, digits, and any special character
+		var pword = Buffer.from(p[1], 'base64').toString();
+		p = /(([\w]|[\W])*)$/.exec(pword); //Alphabet, digits, and any special character
 
-		console.log(u)
+		console.log(u);
 		//m = /^(.*):(.*)$/.exec(user_pass); // probably should do better than this
-		console.log(u)
-		console.log(p)
+		console.log(p);
 		
 		var username = u[1];
 		var password = p[1];
@@ -67,21 +69,205 @@ app.use('/api/auth/login', function (req, res,next) {
 		let sql = 'SELECT * FROM ftduser WHERE username=$1 and password=sha512($2)';
         	pool.query(sql, [username, password], (err, pgRes) => {
   			if (err){
-                		res.status(403).json({ error: 'Not authorized'});
+                res.status(403).json({ error: 'Your username or password is incorrect.'});
 			} else if(pgRes.rowCount == 1){
 				next(); 
 			} else {
-                		res.status(403).json({ error: 'Not authorized'});
+                		res.status(403).json({ error: 'Your username or password is incorrect.'});
         		}
 		});
 	} catch(err) {
-               	res.status(403).json({ error: 'Not authorized'});
+               	res.status(403).json({ error: 'Your username or password is incorrect.'});
+	}
+});
+
+app.use('/api/auth/profile', function (req, res,next) {
+	console.log("profile");
+	console.log(req.method);
+	if (!req.method || req.method != "GET") {
+		return res.status(403).json({ error: 'Invalid method type, please use GET for profile' });
+	}
+	if (!req.headers.username) {
+		return res.status(403).json({ error: 'User not specified' });
+  	}
+	try {
+		//Regex match the username to a valid username.
+		//That is, usernames are only digits and alphabet letters.
+		var u = /(([\w]|[\W])*)$/.exec(req.headers.username);
+		var uname = Buffer.from(u[1], 'base64').toString();
+		u = /(([\w])*)$/.exec(uname); //Only A-Z, a-z, 0-9, and the underscore
+		var username = u[1];
+
+		if (username == null || username == '' || username.length > 20) {
+			return res.status(403).json({error : "Valid user was not specified."});
+		}
+
+		let sql = 'SELECT * FROM ftduser WHERE username=$1';
+        	pool.query(sql, [username], (err, pgRes) => {
+  			if (err){
+                res.status(403).json({ error: 'Your username or password is incorrect.'});
+			} else if(pgRes.rowCount == 1){
+				return res.status(200).json(pgRes.rows[0])
+			} else {
+                res.status(403).json({ error: 'Your username or password is incorrect.'});
+        	}
+		});
+	} catch(err) {
+               	res.status(403).json({ error: 'Your username or password is incorrect.'});
+	}
+});
+
+app.use('/api/auth/updateScore', function (req, res,next) {
+	console.log("update score");
+	console.log(req.method)
+	if (!req.method || req.method != "PUT") {
+		return res.status(403).json({ error: 'Invalid method type, please use PUT for updating score' });
+	} else if (!req.headers.username) {
+		return res.status(403).json({ error: 'Username for score update not specified' });
+  	} else if (!req.headers.score) {
+		return res.status(403).json({ error: 'Score parameter not specified. Cannot update score.' });
+	}
+	try {
+		//Regex match the username to a valid username.
+		//That is, usernames are only digits and alphabet letters. 
+		var u = /(([\w]|[\W])*)$/.exec(req.headers.username);
+		var uname = Buffer.from(u[1], 'base64').toString();
+		u = /(([\w])*)$/.exec(uname); //Only A-Z, a-z, 0-9, and the underscore
+		var username = u[1];
+
+		var score = req.headers.score;
+
+		if (username == null || username == '' || username.length > 20) {
+			return res.status(403).json({error : "Valid user was not specified."});
+		}
+
+		let sql = 'SELECT * FROM ftduser WHERE username=$1';
+        	pool.query(sql, [username], (err, pgRes) => {
+  			if (err){
+                res.status(403).json({ error: 'Your username is invalid; cannot update score'});
+			} else if(pgRes.rowCount == 1){
+				let sql_insert = 'UPDATE ftduser SET score=$2 WHERE username=$1';
+				pool.query(sql_insert, [username,score], (err));
+				return res.status(200).json({"message" : "Successfully updated score!"})
+			} else {
+                res.status(403).json({ error: 'Your username is invalid; cannot update score'});
+        	}
+		});
+	} catch(err) {
+               	res.status(403).json({ error: 'Your username is invalid; cannot update score'});
+	}
+});
+
+app.use('/api/auth/updateUsername', function (req, res, next) {
+	console.log("update username");
+	console.log(req.method)
+	if (!req.method || req.method != "PUT") {
+		return res.status(403).json({ error: 'Invalid method type, please use PUT for updating username' });
+	} else if (!req.headers.username) {
+		return res.status(403).json({ error: 'New username not specified' });
+	} else if (!req.headers.oldusername) {
+		return res.status(403).json({ error: 'Current username not specified' });
+	}
+	try {
+		//Regex match the new username and password to a valid username.
+		//That is, usernames are only digits and alphabet letters.
+		var u = /(([\w]|[\W])*)$/.exec(req.headers.username);
+		var uname = Buffer.from(u[1], 'base64').toString();
+		u = /(([\w])*)$/.exec(uname); //Only A-Z, a-z, 0-9, and the underscore
+		var username = u[1];
+
+		var oldu = /(([\w]|[\W])*)$/.exec(req.headers.oldusername);
+		var olduname = Buffer.from(oldu[1], 'base64').toString();
+		oldu = /(([\w])*)$/.exec(olduname); //Only A-Z, a-z, 0-9, and the underscore
+		var oldUsername = oldu[1];
+
+		if (username == null || username == '' || username.length > 20) {
+			return res.status(403).json({error : "Please enter a valid username. \
+			Usernames must be unique and less than 20 characters long."});
+		}
+		console.log(oldUsername);
+		console.log(username);
+
+		let sql = 'SELECT * FROM ftduser WHERE username=$1';
+        	pool.query(sql, [oldUsername], (err, pgRes) => {
+  			if (err){
+                return res.status(403).json({error : "Please enter a valid username. \
+				Usernames must be unique and less than 20 characters long."});
+			} else if(pgRes.rowCount == 1){
+				let sql_insert = 'UPDATE ftduser SET username=$2 WHERE username=$1';
+				pool.query(sql_insert, [oldUsername,username], (err));
+
+				res.status(200).json({ 'message': 'Success. Username updated.', 'username': username});
+			} else {
+				return res.status(403).json({error : "Please enter a valid username. \
+				Usernames must be unique and less than 20 characters long."});
+        	}
+		});
+	} catch(err) {
+               	res.status(403).json({ error: 'Your username or password is incorrect.'});
+	}
+});
+
+app.use('/api/auth/updateEmail', function (req, res, next) {
+	console.log("update email");
+	console.log(req.method)
+	if (!req.method || req.method != "PUT") {
+		return res.status(403).json({ error: 'Invalid method type, please use PUT for updating email' });
+	} else if (!req.headers.email) {
+		return res.status(403).json({ error: 'New email not specified' });
+	} else if (!req.headers.username) {
+		return res.status(403).json({ error: 'Current username not specified' });
+	}
+	try {
+		//Regex match the current username and password to a valid username.
+		//That is, usernames are only digits and alphabet letters.
+		var u = /(([\w]|[\W])*)$/.exec(req.headers.username);
+		var uname = Buffer.from(u[1], 'base64').toString();
+		u = /(([\w])*)$/.exec(uname); //Only A-Z, a-z, 0-9, and the underscore
+		var username = u[1];
+
+		//Emails are digits & letters.
+		var e = /(([\w]|[\W])*)$/.exec(req.headers.email);
+		var mail = Buffer.from(e[1], 'base64').toString();
+		//Only letters, 0-9, hyphen, period, underscore, plus, and @ sign
+		e = /(([\w]|[\.]|[\+]|[\-])*@([\w]|[\.]|[\+]|[\-])*)$/.exec(mail) ;
+		var email = e[1];
+
+		if (email == null || email == '' || email.length > 78) {
+			return res.status(403).json({error : "Please enter a valid email. Emails must be less than 78 \
+			characters long"});
+		}
+		console.log(email);
+		console.log(username);
+
+		if (username == null || username == '' || username.length > 20) {
+			return res.status(403).json({error : "Current username specified is invalid. Please log in as a valid user."});
+		}
+		let sql = 'SELECT * FROM ftduser WHERE username=$1';
+		pool.query(sql, [username], (err, pgRes) => {
+			if (err){
+				return res.status(403).json({error : "Please enter a valid email. Emails must be less than 78 \
+				characters long"});	
+			} else if(pgRes.rowCount == 1){
+				let sql_insert = 'UPDATE ftduser SET email=$2 WHERE username=$1';
+				pool.query(sql_insert, [username,email], (err));
+				res.status(200).json({ 'message': 'Success. Username updated.', 'email': email});
+			} else {
+				return res.status(403).json({error : "Please enter a valid email. Emails must be less than 78 \
+				characters long"});
+			}
+		});
+	} catch(err) {
+			return res.status(403).json({error : "Please enter a valid email. Emails must be less than 78 \
+			characters long"});
 	}
 });
 
 app.use('/api/register', function (req, res,next) {
 	console.log("ahhh");
-
+	if (!req.method || req.method != "POST") {
+		return res.status(403).json({ error: 'Invalid method type, please use POST for registration' });
+	}
 	if (!req.headers.username || !req.headers.password || 
 		!req.headers.email || !req.headers.firstname || !req.headers.lastname) {
 		return res.status(403).json({ error: 'Please fill out all fields' });
@@ -91,7 +277,7 @@ app.use('/api/register', function (req, res,next) {
 		//That is, usernames are only digits and alphabet letters with two exceptions, dots and underscore.  
 		var u = /(([\w]|[\W])*)$/.exec(req.headers.username);
 		var uname = Buffer.from(u[1], 'base64').toString()
-		u = /(([\w]|[\.])*){1,20}$/.exec(uname) //Only A-Z, a-z, 0-9, the underscore, and a dot
+		u = /(([\w]|[\.])*)$/.exec(uname) //Only A-Z, a-z, 0-9, the underscore, and a dot
 
 		//Passwords are special characters & letters.
 		var p = /(([\w]|[\W])*)$/.exec(req.headers.password);
@@ -100,20 +286,20 @@ app.use('/api/register', function (req, res,next) {
 
 		//Emails are digits & letters.
 		var e = /(([\w]|[\W])*)$/.exec(req.headers.email);
-		var mail = Buffer.from(e[1], 'base64').toString()
+		var mail = Buffer.from(e[1], 'base64').toString();
 		//Only letters, 0-9, hyphen, period, underscore, plus, and @ sign
-		e = /(([\w]|[\.]|[\+]|[\-])*@([\w]|[\.]|[\+]|[\-])*)$/.exec(mail) 
+		e = /(([\w]|[\.]|[\+]|[\-])*@([\w]|[\.]|[\+]|[\-])*)$/.exec(mail);
 
 		//First names are only alphabet characters
 		var f = /(([\w]|[\W])*)$/.exec(req.headers.firstname);
-		var fname = Buffer.from(f[1], 'base64').toString()
-		console.log(fname)
-		f = /(([A-Z]|[a-z])*)$/.exec(fname) //Only A-Z, a-z
+		var fname = Buffer.from(f[1], 'base64').toString();
+		console.log(fname);
+		f = /(([A-Z]|[a-z])*)$/.exec(fname); //Only A-Z, a-z
 
 		//Last names are only alphabet characters
 		var l = /(([\w]|[\W])*)$/.exec(req.headers.lastname);
-		var lname = Buffer.from(l[1], 'base64').toString()
-		l = /([A-Za-z]*)$/.exec(lname) //Only A-Z, a-z
+		var lname = Buffer.from(l[1], 'base64').toString();
+		l = /([A-Za-z]*)$/.exec(lname); //Only A-Z, a-z
 
 		console.log(u);
 		console.log(p);
@@ -121,16 +307,29 @@ app.use('/api/register', function (req, res,next) {
 		console.log(f);
 		console.log(l);
 
-		
-		//m = /^(.*):(.*)$/.exec(user_pass); // probably should do better than this
-
 		var username = u[1];
 		var password = p[1];
 		var email = e[1];
 		var firstname = f[1];
 		var lastname = l[1];
-
 		console.log(username+" "+password+" "+email+" "+firstname+" "+lastname);
+
+		if (username == null || username == '' || username.length > 20) {
+			return res.status(403).json({error : "Please enter a valid username. \
+			Usernames must be unique and less than 20 characters long."});
+		} else if (password == null || password == '' || password.length > 20 || password.length < 6) {
+			return res.status(403).json({error : "Please enter a valid password. \
+			Passwords must be between 6 and 20 characters long."});
+		} else if (email == null || email == '' || email.length > 78) {
+			return res.status(403).json({error : "Please enter a valid email. Emails must be less than 78 \
+			characters long"});
+		} else if (firstname == null || firstname == '' || firstname.length > 20) {
+			return res.status(403).json({error : "Please enter a valid first name strictly in the english \
+			alphabet and less than 20 characters in length."});
+		} else if (lastname == null || lastname == '' || lastname.length > 20) {
+			return res.status(403).json({error : "Please enter a valid last names strictly in the english \
+			alphabet and less than 20 characters in length."});
+		}
 
 		let sql_check = 'SELECT * FROM ftduser WHERE username=$1';
         	pool.query(sql_check, [username], (err, pgRes) => {
@@ -146,15 +345,73 @@ app.use('/api/register', function (req, res,next) {
         	}
 		});
 	} catch(err) {
-               	res.status(403).json({ error: 'Please enter a valid username and password'});
+		
+        res.status(403).json({ error: 'Please ensure all fields are valid'});
 	}
 
+});
+
+app.use('/api/auth/delete', function (req, res, next) {
+
+	console.log("delete user");
+	console.log(req.method)
+	if (!req.method || req.method != "DELETE") {
+		return res.status(403).json({ error: 'Invalid method type, please use DELETE for deleting user' });
+	} else if (!req.headers.username) {
+		return res.status(403).json({ error: 'username not specified' });
+	}
+
+	try {
+		//Regex match the new username and password to a valid username.
+		//That is, usernames are only digits and alphabet letters.
+		var u = /(([\w]|[\W])*)$/.exec(req.headers.username);
+		var uname = Buffer.from(u[1], 'base64').toString();
+		u = /(([\w])*)$/.exec(uname); //Only A-Z, a-z, 0-9, and the underscore
+		var username = u[1];
+
+		console.log(username);
+
+		let sql = 'SELECT * FROM ftduser WHERE username=$1';
+        	pool.query(sql, [username], (err, pgRes) => {
+  			if (err){
+                return res.status(403).json({error : "Could not delete user. (Are you authenticated?)"});
+			} else if(pgRes.rowCount == 1){
+				let sql_delete = 'DELETE FROM ftduser WHERE username=$1';
+				pool.query(sql_delete, [username], (err));
+				res.status(200).json({'message': 'Success. User deleted.'});
+			} else {
+				return res.status(403).json({error : "Could not delete user. (Are you authenticated?)"});
+        	}
+		});
+	} catch(err) {
+               	res.status(403).json({ error: 'Could not delete user. (Are you authenticated?)'});
+	}
 });
 
 // All routes below /api/auth require credentials 
 app.post('/api/auth/login', function (req, res) {
 	res.status(200); 
 	res.json({"message":"authentication success"}); 
+});
+
+app.get('/api/auth/profile', function (req, res) {
+	res.status(200); 
+	res.json({"message":"profile information extraction success"}); 
+});
+
+app.delete('/api/auth/delete', function(req, res) {
+	res.status(200); 
+	res.json({"message":"profile deletion success"}); 
+});
+
+app.put('/api/auth/updateScore', function (req, res) {
+	res.status(200); 
+	res.json({"message":"score update success"}); 
+});
+
+app.put('api/auth/updateUsername', function (req, res) {
+	res.status(200); 
+	res.json({"message":"username update success"}); 
 });
 
 app.post('/api/register', function (req, res) {

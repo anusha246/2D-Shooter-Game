@@ -50,12 +50,8 @@ p {
 	text-align: center;
 }
 
-a:link {
-    text-decoration: underline;
-}
-
 a {
-    color:blue;
+    color: white;
     text-decoration: underline;
 	font-family: Verdana, sans-serif;
 }
@@ -101,7 +97,6 @@ a {
 
 #sidebar ul{
 	background-color: #5F9EA0;
-	border: 1px solid white;
 	float: left;
 	margin-left: 20px;
 	margin-right: 10px;
@@ -143,4 +138,8 @@ a {
 
 #shotgunText {
 	color: red;
+}
+
+#ui_profile div {
+	text-align: center;
 }
