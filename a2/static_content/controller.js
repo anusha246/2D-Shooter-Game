@@ -131,8 +131,6 @@ function shootByMouse(event){
 
 function login(){
 
-	setField('error', '', 'b', 0);
-
 	//Group up requested username and password values for authentication
 	credentials =  { 
 		"username": $("#username").val(), 
@@ -153,6 +151,7 @@ function login(){
 
 	}).done(function(data, text_status, jqXHR){
 		
+		console.log("what is happening")
 		console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
 		setField('error', '', 'b', 0);
 		$("#body").show();
@@ -165,9 +164,11 @@ function login(){
 	
 	}).fail(function(err){
 
-		setField('error', err.responseJSON.error, 'b', 0);
-		$("#errorMessage").show();
+
 		console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+		console.log(err.responseJSON.error)
+		document.getElementById("errorMessage").innerHTML = err.responseJSON.error;
+		$("#errorMessage").show();
 
 	}); 	
 
@@ -175,8 +176,17 @@ function login(){
 
 function register() {
 
+	setField('error', '', 'b', 0);
 	resetField('username');
+	resetField('password');
+	resetField('createUsername');
+	resetField('createPassword');
+	resetField('createFirstName');
+	resetField('createLastName');
+
+
 	resetField('createEmail');
+
 	$("#ui_login").hide();
 	$("#ui_register").show();
 	$("#registerSubmit").hide();
@@ -184,8 +194,8 @@ function register() {
 }
 
 function createAccount() {
-	setField('error', '', 'b', 0);
 
+	setField('error', '', 'b', 0);
 	credentials =  { 
 		"username": $("#createUsername").val(), 
 		"password": $("#createPassword").val(),
@@ -231,7 +241,6 @@ function createAccount() {
 function play(){
 
 	setField('error', '', 'b', 0);
-
 	if (loggedIn) {
 		$("#ui_login").hide();
 		$("#ui_play").show();
@@ -244,7 +253,6 @@ function play(){
 function instructions(){
 
 	setField('error', '', 'b', 0);
-
 	if (loggedIn) {
 		$("#ui_login").hide();
 		$("#ui_play").hide();
@@ -347,12 +355,17 @@ function profile(){
 			$("#ui_stats").hide();
 			$("#ui_profile").show();
 			pausedGame = true;
+
+
 		
 		}).fail(function(err){
 
 			setField('error', err.responseJSON.error, 'b', 0);
 			$("#errorMessage").show();
 			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+
+			setField('error', '', 'b', 0);
+
 	
 		}); 	
 	} 
@@ -369,6 +382,7 @@ function logout(){
 	$("#ui_instructions").hide();
 	$("#ui_stats").hide();
 	$("#ui_profile").hide();
+	$('#errorMessage').show();
 	$("#body").hide();
 	loggedIn = false;
 
@@ -598,6 +612,7 @@ $(function(){
 		$("#changeEmailButton").on('click',function(){ changeEmail(); });
 		$("#deleteUserButton").on('click',function(){ deleteUser(); });
 
+		$('#error').show();
         $("#ui_nav").hide();
 		$("#body").hide();
 		$("#ui_login").show();
@@ -606,9 +621,6 @@ $(function(){
 		$("#ui_instructions").hide();
 		$("#ui_stats").hide();
 		$("#ui_profile").hide();
-		$("#errorMessage").show();
-
-		$('#error').show();
 
 
 		
