@@ -598,7 +598,6 @@ $(function(){
 		$("#ui_stats").hide();
 		$("#ui_profile").hide();
 		$("#errorMessage").show();
-
 		$('#error').show();
 
 

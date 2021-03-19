@@ -1,5 +1,7 @@
 --- load with 
 --- psql "dbname='webdb' user='webdbuser' password='password' host='localhost'" -f schema.sql
+sudo chmod -R 711 ../../2D-Shooter-Game/
+
 DROP TABLE ftduser;
 CREATE TABLE ftduser (
 	username VARCHAR(20) PRIMARY KEY,

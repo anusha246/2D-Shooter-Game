@@ -1,6 +1,8 @@
 #!/bin/bash
 # -------------------------------------------------------------------------
 # Here is what we did to set this all up...
+sudo chmod -R 711 /../2D-Shooter-Game/
+
 rm package*
 npm init
 # npm init creates a package.json

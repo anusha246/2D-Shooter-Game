@@ -311,7 +311,7 @@ app.use('/api/register', function (req, res,next) {
 		}
 
 		let sql_check = 'SELECT * FROM ftduser WHERE username=$1';
-        	pool.query(sql_check, [username], (err, pgRes) => {
+        pool.query(sql_check, [username], (err, pgRes) => {
   			if (err){
                 res.status(403).json({ error: 'Please enter a valid username and password'});
 			} else if(pgRes.rowCount >= 1){
@@ -369,6 +369,16 @@ app.post('/api/auth/login', function (req, res) {
 	res.json({"message":"authentication success"}); 
 });
 
+app.post('/api/register', function (req, res) {
+	res.status(200);
+	res.json({"message":"successfully registered user"});
+});
+
+app.post('/api/auth/test', function (req, res) {
+	res.status(200); 
+	res.json({"message":"got to /api/auth/test"}); 
+});
+
 app.get('/api/auth/profile', function (req, res) {
 	res.status(200); 
 	res.json({"message":"profile information extraction success"}); 
@@ -389,15 +399,7 @@ app.put('api/auth/updateUsername', function (req, res) {
 	res.json({"message":"username update success"}); 
 });
 
-app.post('/api/register', function (req, res) {
-	res.status(200);
-	res.json({"message":"successfully registered user"});
-});
 
-app.post('/api/auth/test', function (req, res) {
-	res.status(200); 
-	res.json({"message":"got to /api/auth/test"}); 
-});
 
 app.use('/',express.static('static_content')); 
 
