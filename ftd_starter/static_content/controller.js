@@ -7,22 +7,23 @@ const SPEED = 3;
 var loggedIn = false;
 
 function setupGame(){
+
 	stage=new Stage(document.getElementById('stage'));
 
-	// https://javascript.info/keyboard-events
-	//document.addEventListener('show', aimByMouse);
 	document.addEventListener('mousemove', aimByMouse);
 	document.addEventListener('click', shootByMouse);
 	
 	document.addEventListener('keydown', actionByKey);
 	document.addEventListener('keyup', stopMoving);
-	
-	
+
 }
+
 function startGame(){
 	animate();
 }
+
 function animate() {
+
 	stage.step();
 	stage.draw();
 	if (pausedGame) { 
@@ -30,50 +31,36 @@ function animate() {
 	} else if (!stage.isGameDone){
 		requestAnimationFrame(animate);	
 	}
+
 }
+
 function pauseGame(){
 	
-	
-	
 	var context = stage.canvas.getContext('2d');
-	//context.setTransform(1,0,0,1,0,0);
-	//context.translate( stage.camX, stage.camY );
-	
 	context.fillStyle = 'rgba(0,0,0,0.5)';
-	
 	context.fillRect(-stage.view_width, -stage.view_height, 
 					stage.width+stage.view_width + stage.view_width, 
-					stage.height+stage.view_height + stage.view_height);
-			
-					
+					stage.height+stage.view_height + stage.view_height);		
 	context.font = "30px Courier New";
 	context.fillStyle = "white";
 	context.textAlign = "center";
 	context.fillText("Paused", stage.player.position.x, stage.player.position.y);
 	context.fillText("Press 'p' to resume", stage.player.position.x, stage.player.position.y + 30);
 	
-	
-	
 }
 
 //Function code used from 
 //https://stackoverflow.com/questions/17130395/real-mouse-position-in-canvas
 function getMousePos(event) {
+
     var rect = stage.canvas.getBoundingClientRect();
-	
-	if (!stage.isGameDone){
-	
-		console.log(event.clientX, +"    "+event.clientY);
-		console.log(new Pair((event.clientX - rect.left) / (rect.right - rect.left) * stage.width + stage.player.position.x - stage.width/2,
-						(event.clientY - rect.top) / (rect.bottom - rect.top) * stage.height + stage.player.position.y - stage.height/2));
-		
+	if (!stage.isGameDone){		
 		return new Pair((event.clientX - rect.left) / (rect.right - rect.left) * stage.width + stage.player.position.x - stage.width/2,
 						(event.clientY - rect.top) / (rect.bottom - rect.top) * stage.height + stage.player.position.y - stage.height/2);
 	}
-		
-	
-					
+				
 }
+
 function actionByKey(event){
 
 	var key = event.key;
@@ -96,7 +83,7 @@ function actionByKey(event){
 			}
 		}
 	}
-		
+
 }
 
 function stopMoving(event){
@@ -106,7 +93,6 @@ function stopMoving(event){
 }
 
 function aimByMouse(event){
-	//console.log(getMousePos(event).x + " " + getMousePos(event).y);
 	if(!stage.isGameDone){
 		stage.player.aim_pos = getMousePos(event);
 	}
@@ -125,61 +111,59 @@ function shootByMouse(event){
 			
 			var bullet_pos_x = stage.player.turret_pos.x;
 			var bullet_pos_y = stage.player.turret_pos.y + 1;
-			
 			stage.addActor(new Bullet(stage, new Pair(bullet_pos_x, bullet_pos_y), mouse_pos,
 										new Pair(0, 0), 'rgba(0,255,0,1)', 3, "Player", 
 										stage.player.gunType));
-							
-			
 			stage.player.ammo--;
+
 		}
 	}
-	
 }
 
 function login(){
+
 	setField('error', '', 'b', 0);
 
-
+	//Group up requested username and password values for authentication
 	credentials =  { 
 		"username": $("#username").val(), 
 		"password": $("#password").val() 
 	};
 		
-        $.ajax({
+	$.ajax({
 
-			method: "POST",
-			url: "/api/auth/login",
-			data: JSON.stringify({}),
-			headers: { "Authorization": "Basic", "username" : btoa(credentials.username), 
-			"password" : btoa(credentials.password) },
-			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
-			processData:false,
-			contentType: "application/json; charset=utf-8",
-			dataType:"json"
+		method: "POST",
+		url: "/api/auth/login",
+		data: JSON.stringify({}),
+		headers: { "Authorization": "Basic", "username" : btoa(credentials.username), 
+		"password" : btoa(credentials.password) },
+		//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+		processData:false,
+		contentType: "application/json; charset=utf-8",
+		dataType:"json"
 
-        }).done(function(data, text_status, jqXHR){
-            
-			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
-			
-			setField('error', '', 'b', 0);
-			
-			$("#body").show();
-        	$("#ui_login").hide();
-        	$("#ui_play").show();
-			$("#ui_nav").show();
-			loggedIn = true;
-			setupGame();
-			startGame();
+	}).done(function(data, text_status, jqXHR){
 		
-        }).fail(function(err){
-			setField('error', err.responseJSON.error, 'b', 0);
-			$("#errorMessage").show();
-            console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
-        }); 	
-		
+		console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+		setField('error', '', 'b', 0);
+		$("#body").show();
+		$("#ui_login").hide();
+		$("#ui_play").show();
+		$("#ui_nav").show();
+		loggedIn = true;
+		setupGame();
+		startGame();
+	
+	}).fail(function(err){
+
+		setField('error', err.responseJSON.error, 'b', 0);
+		$("#errorMessage").show();
+		console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+
+	}); 	
 
 }
+
 function register() {
 
 	resetField('username');
@@ -189,6 +173,7 @@ function register() {
 	$("#registerSubmit").hide();
 
 }
+
 function createAccount() {
 	setField('error', '', 'b', 0);
 
@@ -227,6 +212,7 @@ function createAccount() {
 		$("#registerSubmit").show();
 
 	}).fail(function(err){
+
 		setField('error', err.responseJSON.error, 'b', 0);
 		$("#errorMessage").show();
 		console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
@@ -234,6 +220,7 @@ function createAccount() {
 	}); 	
 }
 function play(){
+
 	setField('error', '', 'b', 0);
 
 	if (loggedIn) {
@@ -246,6 +233,7 @@ function play(){
 	
 }
 function instructions(){
+
 	setField('error', '', 'b', 0);
 
 	if (loggedIn) {
@@ -296,6 +284,7 @@ function gunTypes(){
 }
 
 function stats(){
+
 	setField('error', '', 'b', 0);
 
 	if (loggedIn) {
@@ -309,6 +298,7 @@ function stats(){
 
 }
 function profile(){
+
 	setField('error', '', 'b', 0);
 
 	if (loggedIn) {
@@ -331,7 +321,6 @@ function profile(){
 		}).done(function(data, text_status, jqXHR){
 			
 			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
-			
 			setField('ui_profile', "Username: " + data.username, 'b', 0);
 			setField('ui_profile', "Email: " + data.email, 'b', 2);
 			setField('ui_profile', "First Name: " + data.firstname, 'b', 3);
@@ -341,9 +330,7 @@ function profile(){
 			}
 			else {
 				setField('ui_profile', "Score: " + data.score, 'b', 5);
-			}
-			//updateField('ui_profile', JSON.stringify(data), 'b', 0);
-			
+			}			
 			
 			$("#ui_login").hide();
 			$("#ui_play").hide();
@@ -353,21 +340,20 @@ function profile(){
 			pausedGame = true;
 		
 		}).fail(function(err){
+
 			setField('error', err.responseJSON.error, 'b', 0);
 			$("#errorMessage").show();
 			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
 	
 		}); 	
-		
-
 	} 
-
 }
+
 function logout(){
+
 	setField('error', '', 'b', 0);
 	resetField('username');
 	resetField('password');
-
 	$("#ui_nav").hide();
 	$("#ui_login").show();
 	$("#ui_play").hide();
@@ -378,8 +364,11 @@ function logout(){
 	loggedIn = false;
 
 }
+
 function updateScore(score) {
+
 	if (loggedIn) {
+
 		credentials =  { 
 			"username": $("#username").val(), 
 		};
@@ -398,14 +387,13 @@ function updateScore(score) {
 		}).done(function(data, text_status, jqXHR){
 			
 			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
-			
 			if (!data.score) {
 				setField('ui_profile', "Score: 0", 'b', 5);
 			}
 			else {
 				setField('ui_profile', "Score: " + data.score, 'b', 5);
 			}
-			//updateField('ui_profile', JSON.stringify(data), 'b', 0);
+
 			$("#ui_login").hide();
 			$("#ui_play").show();
 			$("#ui_instructions").hide();
@@ -413,6 +401,7 @@ function updateScore(score) {
 			$("#ui_profile").hide();
 
 		}).fail(function(err){
+
 			setField('error', err.responseJSON.error, 'b', 0);
 			$("#errorMessage").show();
 			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
@@ -420,8 +409,11 @@ function updateScore(score) {
 		}); 	
 	}
 }
+
 function changeUsername() {
+
 	if (loggedIn) {
+
 		credentials =  { 
 			"oldusername": $("#username").val(), 
 			"username": $("#changeUsername").val(), 
@@ -442,12 +434,11 @@ function changeUsername() {
 		}).done(function(data, text_status, jqXHR){
 			
 			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
-			
-
 			setField('ui_profile', "Username: " + data.username, 'b', 0);
 			resetField('changeUsername');
 			var getUser = document.getElementById('username');
 			getUser.value = data.username;
+
 			$("#ui_login").hide();
 			$("#ui_play").hide();
 			$("#ui_instructions").hide();
@@ -456,6 +447,7 @@ function changeUsername() {
 			pausedGame = true;
 
 		}).fail(function(err){
+
 			setField('error', err.responseJSON.error, 'b', 0);
 			$("#errorMessage").show();
 			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
@@ -463,8 +455,11 @@ function changeUsername() {
 		}); 	
 	}
 }
+
 function deleteUser() {
+
 	if (loggedIn) {
+
 		credentials =  { 
 			"username": $("#username").val(), 
 		};
@@ -483,10 +478,7 @@ function deleteUser() {
 		}).done(function(data, text_status, jqXHR){
 			
 			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
-			
 			setField('error', data.message, 'b', 0);
-
-
 			resetField('username');
 			$("#ui_login").show();
 			$("#ui_play").hide();
@@ -494,10 +486,10 @@ function deleteUser() {
 			$("#ui_stats").hide();
 			$("#ui_profile").hide();
 			$("#ui_nav").hide();
-
 			pausedGame = true;
 
 		}).fail(function(err){
+
 			setField('error', err.responseJSON.error, 'b', 0);
 			$("#errorMessage").show();
 			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
@@ -506,7 +498,9 @@ function deleteUser() {
 	}
 }
 function changeEmail() {
+
 	if (loggedIn) {
+
 		credentials =  { 
 			"username": $("#username").val(), 
 			"email": $("#changeEmail").val(), 
@@ -519,7 +513,6 @@ function changeEmail() {
 			data: JSON.stringify({}),
 			headers: { "PUT": "New email", "username" : btoa(credentials.username), 
 			"email" : btoa(credentials.email) },
-			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
 			processData:false,
 			contentType: "application/json; charset=utf-8",
 			dataType:"json"
@@ -527,7 +520,6 @@ function changeEmail() {
 		}).done(function(data, text_status, jqXHR){
 			
 			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
-			
 			resetField('changeEmail');
 			setField('ui_profile', "Email: " + data.email, 'b', 2);
 			$("#ui_login").hide();
@@ -538,6 +530,7 @@ function changeEmail() {
 			pausedGame = true;
 
 		}).fail(function(err){
+
 			setField('error', err.responseJSON.error, 'b', 0);
 			$("#errorMessage").show();
 			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
@@ -545,6 +538,7 @@ function changeEmail() {
 		}); 	
 	}
 }
+
 function updateField(field, message, tag, index) {
 	var getDiv = document.getElementById(field);
 	var setTag = getDiv.getElementsByTagName(tag)[index];
@@ -559,7 +553,7 @@ function resetField(field){
 	var toReset = document.getElementById(field);
 	toReset.value = toReset.defaultValue; 
 }
-// Using the /api/auth/test route, must send authorization header
+
 function test(){
         $.ajax({
                 method: "GET",
