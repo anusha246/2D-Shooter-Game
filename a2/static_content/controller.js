@@ -10,6 +10,7 @@ function setupGame(){
 
 	stage=new Stage(document.getElementById('stage'));
 
+	//Add event listeners for mouse and keyboard events
 	document.addEventListener('mousemove', aimByMouse);
 	document.addEventListener('click', shootByMouse);
 	
@@ -22,10 +23,12 @@ function startGame(){
 	animate();
 }
 
+//Animate game if not paused or done
 function animate() {
 
 	stage.step();
 	stage.draw();
+	
 	if (pausedGame) { 
 		pauseGame(); 
 	} else if (!stage.isGameDone){
@@ -34,8 +37,10 @@ function animate() {
 
 }
 
+
 function pauseGame(){
 	
+	//Show pause screen on viewport
 	var context = stage.canvas.getContext('2d');
 	context.fillStyle = 'rgba(0,0,0,0.5)';
 	context.fillRect(-stage.view_width, -stage.view_height, 
@@ -61,6 +66,8 @@ function getMousePos(event) {
 				
 }
 
+//Set player velocity with WASD or pause with P
+//if game is not done
 function actionByKey(event){
 
 	var key = event.key;
@@ -86,6 +93,7 @@ function actionByKey(event){
 
 }
 
+//Stop player moving
 function stopMoving(event){
 	if(!stage.isGameDone){
 		stage.player.velocity=new Pair(0,0);
@@ -106,6 +114,7 @@ function shootByMouse(event){
 	if (!stage.isGameDone && !pausedGame && 
 		stage.player.turret_pos.x>=0 && stage.player.turret_pos.x<=stage.width &&
 		stage.player.turret_pos.y>=0 && stage.player.turret_pos.y<=stage.height){
+			
 		//If player has ammo, shoot a bullet from turret, decrease ammo count
 		if (stage.player.ammo > 0){
 			

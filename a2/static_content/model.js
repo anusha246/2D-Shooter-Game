@@ -13,7 +13,7 @@ class Stage {
 		this.width=800;
 		this.height=800;
 		
-		
+		//Get the width and height of the html canvas viewport
 		this.view_width=canvas.width;
 		this.view_height=canvas.height;
 		this.camX = this.width/2;
@@ -60,7 +60,7 @@ class Stage {
 		
 		
 	
-		// Add in some Boxes
+		// Generate Boxes
 		this.numBoxes=20;
 		this.generateBoxes(this.numBoxes);
 		
@@ -87,15 +87,18 @@ class Stage {
 		}
 	}
 
-	// Take one step in the animation of the game.  Do this by asking each of the actors to take a single step. 
-	// NOTE: Careful if an actor died, this may break!
+	// Take one step in the animation of the game.  
+	//Do this by asking each of the actors to take a single step. 
 	step(){
+		//Loop through actors list
 		for(var i=0;i<this.actors.length;i++){
 			
 			//If actor can take a step, do it 
 			if (typeof this.actors[i].step == 'function'){
 				
 				var shouldStep = true;
+				
+				//Loop through actors list to check for collisions
 				for(var j=0;j<this.actors.length;j++){
 					
 					//If the player is dead or all opponents are dead
@@ -103,10 +106,13 @@ class Stage {
 					if (!this.actors[i].shouldStep(this.actors[j])){
 							
 						shouldStep = false;
+						
+						//If a bullet hits a player or opponent it was not shot from
 						if (this.actors[i].constructor.name == "Bullet" &&
 							this.actors[j].constructor.name != "Box" &&
 							this.actors[i].shotFrom != this.actors[j].constructor.name){
 							
+							//If bullet was shot from player, update player score
 							if (this.player && this.actors[i].shotFrom == "Player") {
 								this.player.score++;
 								updateScore(this.player.score);
@@ -116,10 +122,12 @@ class Stage {
 					}
 				}
 				
+				//If actor is not colliding with anything, step
 				if(shouldStep){
 					this.actors[i].step();
 					
-					
+					//If actor is the player, adjust its aim position
+					//based on its velocity
 					if (this.actors[i] == this.player){
 						this.actors[i].aim_pos.x += this.actors[i].velocity.x;
 						this.actors[i].aim_pos.y += this.actors[i].velocity.y;
@@ -150,6 +158,7 @@ class Stage {
 					this.score = this.player.score;
 					this.midPosition = this.player.position;
 					
+					//Remove player or opponent whose health is 0
 					if (this.actors[i] == this.player){
 						this.removePlayer(this.actors[i]);
 					} else {
@@ -158,11 +167,13 @@ class Stage {
 				}
 			}
 			
+			//If there are no more boxes on canvas, generate more
 			if (!this.actors.some(Object => Object.constructor.name == "Box")){
 						
 				this.generateBoxes(this.numBoxes);
 			} 
 			
+			//If there is no player or no opponents on canvas, game is done
 			if (this.player == null || 
 				!this.actors.some(Object => Object.constructor.name == "Opponent")){
 						
@@ -179,6 +190,8 @@ class Stage {
 		var context = this.canvas.getContext('2d');
 		
 		if (this.isGameDone){
+			
+			//Set background and font for game done screen on viewport
 			context.fillStyle = 'rgba(0,0,0,0.5)';
 			context.fillRect(-this.view_width, -this.view_height, 
 					this.width+this.view_width + this.view_width, this.height+this.view_height + this.view_height);
@@ -187,12 +200,13 @@ class Stage {
 			context.fillStyle = "white";
 			context.textAlign = "center";
 			
+			//If player is dead, show Game Over (game loss) and score
 			if (this.player == null){
 				context.fillText("Game Over", this.midPosition.x, this.midPosition.y);
 				context.fillText("Your score is " + this.score, 
 									this.midPosition.x, this.midPosition.y + 30);
 									
-			//All opponents are dead
+			//All opponents are dead, show Game Won and score
 			} else {
 				var bonus = 5;
 				this.score += bonus;
@@ -204,26 +218,27 @@ class Stage {
 									this.midPosition.x, this.midPosition.y + 60);
 			}
 				
-				
+		//Game is not done
 		} else {
 			
-			context.setTransform(1,0,0,1,0,0);//reset the transform matrix as it is cumulative
+			//Reset the transform matrix, clear canvas
+			context.setTransform(1,0,0,1,0,0);
 			context.clearRect(0, 0, this.width, this.height);
 			
-			
+			//Set viewport position centered on player and translate to it
 			this.camX = -this.player.x + this.view_width / 2;
 			this.camY = -this.player.y + this.view_height / 2;
 			
-			
 			context.translate( this.camX, this.camY ); 
 			
+			//Color canvas white with black border
 			context.fillStyle = "white";
 			context.fillRect(0, 0, this.width, this.height);
 			context.strokeStyle = 'black';
 			context.fillStyle = 'rgba(0,0,0,1)';
 			context.strokeRect(0, 0, this.width, this.height);
 			
-			
+			//Loop through all actors
 			for(var i=0;i<this.actors.length;i++){
 
 				//If actor exists, draw it
@@ -248,27 +263,31 @@ class Stage {
 		return null;
 	}
 	
+	//Generate numBoxes Boxes randomly placed and sized on canvas
 	generateBoxes(numBoxes){
 		while(numBoxes>0){
+			
+			//Get random x and y position based on canvas size
 			var x=Math.floor((Math.random()*(this.width-200))); 
 			var y=Math.floor((Math.random()*(this.height-200))); 
+			
+			//If an actor does not exist at (x, y) position
 			if(this.getActor(x,y)===null){
-				//var velocity = new Pair(rand(20), rand(20));
-	
+				
 				var red=randint(255), green=randint(255), blue=randint(255);
 				
 				//Random integers in range code below from
 				//https://stackoverflow.com/questions/1527803/generating-random-whole-numbers-in-javascript-in-a-specific-range
+				//Set width and height values between 5 and 200 inclusive
 				var width = Math.floor(Math.random() * (200 - 5 + 1)) + 5;
 				var height = Math.floor(Math.random() * (200 - 5 + 1)) + 5;
 				
-				//var alpha = Math.random();
 				var colour= 'rgba('+red+','+green+','+blue+','+0.75+')';
 				var position = new Pair(x,y);
 				var health = 3;
 				var type = "Ammo";
 				
-				//var b = new Ball(this, position, velocity, colour, radius);
+				//Randomly make a Box a gun box based on gunSpawn value
 				var gunSpawn = Math.floor(Math.random()*10);
 				if (gunSpawn == 0){
 					type = "Pistol";
@@ -281,7 +300,7 @@ class Stage {
 					health = 100;
 				}
 					
-				 
+				//Add Box to actors
 				var b = new Box(this, position, colour, width, height, health, type);
 				this.addActor(b);
 				numBoxes--;
@@ -309,6 +328,7 @@ class Pair {
 		this.y=this.y/magnitude;
 	}
 	
+	//Scale a Pair by num's value
 	multiply(num){
 		this.x = this.x * num;
 		this.y = this.y * num;
@@ -346,14 +366,14 @@ class Box {
 	}
 	draw(context){
 		
-		
 		context.fillStyle = this.colour;
    		context.fillRect(this.x, this.y, this.width, this.height);  
 		
-		context.font = "15px Courier New";
-		context.fillStyle = "black";
-		context.textAlign = "center";
+		//Only show health on box if ammo box
 		if (this.type == "Ammo"){
+			context.font = "15px Courier New";
+			context.fillStyle = "black";
+			context.textAlign = "center";
 			context.fillText(this.health, this.x+this.width/2, this.y+this.height/2+4);
 		}
 	}
@@ -381,6 +401,7 @@ class Ball {
 		return this.position.toString() + " " + this.velocity.toString();
 	}
 	
+	//Returns true if this is not going into object, false otherwise
 	shouldStep(object){
 		if (object.constructor.name == "Box"){
 			
@@ -390,6 +411,8 @@ class Ball {
 				this.position.y + this.velocity.y > object.position.y &&
 				this.position.y + this.velocity.y < object.position.y + object.height){
 				
+				//If this is a Bullet, decrease object (Box) health
+				//and expire Bullet
 				if (this.constructor.name == "Bullet"){
 					object.health--;
 					this.lifetime = 0;
@@ -431,15 +454,19 @@ class Ball {
 					
 					if (this.constructor.name == "Bullet"){
 						
+						//If Bullet colliding into other Bullet
 						if (object.constructor.name == "Bullet"){
 							
 							if (this.shotFrom != object.shotFrom){
 								object.lifetime = 0;
+								
+							//Friendly bullet, keep moving
 							} else {
 								return true;
 							}
 							
-						//If bullet was not shot from object
+						//If bullet was not shot from object, decrease 
+						//object health and expire Bullet
 						} else if (object.constructor.name != this.shotFrom){
 							object.health--;
 							this.lifetime = 0;
@@ -463,12 +490,12 @@ class Ball {
 
 	step(){
 		
-		
+		//Update position based on velocity
 		this.position.x=this.position.x+this.velocity.x;
 		this.position.y=this.position.y+this.velocity.y;
 			
 			
-		// bounce off the walls
+		// bounce off the canvas walls
 		if(this.position.x<0){
 			this.position.x=0;
 			this.velocity.x=Math.abs(this.velocity.x);
@@ -496,8 +523,6 @@ class Ball {
 		
 		
 		context.fillStyle = this.colour;
-   		//context.fillRect(this.x, this.y, this.radius,this.radius);
-		
 		
 		context.beginPath(); 
 		context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false); 
@@ -521,15 +546,6 @@ class Player extends Ball {
 	}
 	
 	draw(context){
-		/*
-		context.save();
-		
-		//context.translate(actor.position.x, actor.position.y);
-		context.translate(this.x, this.y);
-		context.rotate(80 * Math.PI / 180);
-		*/
-		
-		
 		
 		//Draw turret
 		this.turret_pos.x=(this.aim_pos.x - this.x);
@@ -586,9 +602,6 @@ class Player extends Ball {
 		context.fillText("Score: " + this.score, this.x - stage.view_width/2 + 10, 
 							this.y - stage.view_height/2 + 20);
 		
-		
-		
-		//context.restore();
 	}
 		
 	
@@ -615,6 +628,7 @@ class Opponent extends Ball {
 		this.aim_pos = this.stage.player.position;
 		this.move_time--;
 		
+		//If move_time expired, set new random one, new random velocity
 		if (this.move_time <= 0){
 			
 			//Set a new move_time between 100 and 200
@@ -627,8 +641,9 @@ class Opponent extends Ball {
 		}
 		
 		
-		
+		//Randomly shoot bullet from turret towards player
 		if (Math.floor(Math.random()*200) == 0){
+			
 			//If opponent has ammo, shoot a bullet from turret, decrease ammo count
 			if (this.ammo > 0){
 				
@@ -722,16 +737,18 @@ class Bullet extends Ball {
 		this.headTo(this.aim_pos);
 		this.velocity.multiply(2);
 		
+		//Set lifetimes and velocities based on gun type
 		if (type == "Sniper"){
 			this.lifetime = this.lifetime*2;
 			this.velocity.multiply(4);
 			
 		} else if (type == "Shotgun"){
+			
 			//Create two more bullets
-			var displacement = 300;
 			
 			//Getting arc coordinates code from
 			//https://stackoverflow.com/questions/12342102/html5-get-coordinates-of-arcs-end
+			//Use arc coordinates to set bullet position offset, aim_pos offset
 			this.stage.addActor(new Bullet(this.stage, 
 									new Pair(this.position.x+Math.cos(45*Math.PI/180)*3,
 											this.position.y+Math.sin(45*Math.PI/180)*3), 
