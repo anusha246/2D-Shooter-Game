@@ -169,7 +169,15 @@ function register() {
 
 	setField('error', '', 'b', 0);
 	resetField('username');
+	resetField('password');
+	resetField('createUsername');
+	resetField('createPassword');
+	resetField('createFirstName');
+	resetField('createLastName');
+
+
 	resetField('createEmail');
+
 	$("#ui_login").hide();
 	$("#ui_register").show();
 	$("#registerSubmit").hide();
