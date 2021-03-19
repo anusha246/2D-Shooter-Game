@@ -231,9 +231,6 @@ class Stage {
 					this.actors[i].draw(context);
 				}
 			
-			
-			
-			//console.log("Draw: " + stage.player.aim_pos);
 			}
 		}
 		
@@ -444,8 +441,6 @@ class Ball {
 							
 						//If bullet was not shot from object
 						} else if (object.constructor.name != this.shotFrom){
-							console.log(object.constructor.name);
-							console.log(this.shotFrom);
 							object.health--;
 							this.lifetime = 0;
 						} else {
@@ -659,8 +654,7 @@ class Opponent extends Ball {
 	draw(context){
 		
 		//Draw turret
-		//console.log(this.aim_pos);
-		
+
 		this.turret_pos.x=(this.aim_pos.x - this.x);
 		this.turret_pos.y=(this.aim_pos.y - this.y);
 		this.turret_pos.normalize();

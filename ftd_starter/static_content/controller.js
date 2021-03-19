@@ -120,7 +120,6 @@ function shootByMouse(event){
 	if (!stage.isGameDone && !pausedGame && 
 		stage.player.turret_pos.x>=0 && stage.player.turret_pos.x<=stage.width &&
 		stage.player.turret_pos.y>=0 && stage.player.turret_pos.y<=stage.height){
-		//console.log("hi");
 		//If player has ammo, shoot a bullet from turret, decrease ammo count
 		if (stage.player.ammo > 0){
 			
@@ -139,6 +138,8 @@ function shootByMouse(event){
 }
 
 function login(){
+	setField('error', '', 'b', 0);
+
 
 	credentials =  { 
 		"username": $("#username").val(), 
@@ -181,13 +182,15 @@ function login(){
 }
 function register() {
 
-	//console.log("register clicked");
+	resetField('username');
+	resetField('createEmail');
 	$("#ui_login").hide();
 	$("#ui_register").show();
 	$("#registerSubmit").hide();
 
 }
 function createAccount() {
+	setField('error', '', 'b', 0);
 
 	credentials =  { 
 		"username": $("#createUsername").val(), 
@@ -214,6 +217,7 @@ function createAccount() {
 		
 		console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
 		setField('error', '', 'b', 0);
+		resetField('password');
 		$("#ui_login").show();
 		$("#ui_play").hide();
 		$("#ui_instructions").hide();
@@ -230,6 +234,7 @@ function createAccount() {
 	}); 	
 }
 function play(){
+	setField('error', '', 'b', 0);
 
 	if (loggedIn) {
 		$("#ui_login").hide();
@@ -241,6 +246,7 @@ function play(){
 	
 }
 function instructions(){
+	setField('error', '', 'b', 0);
 
 	if (loggedIn) {
 		$("#ui_login").hide();
@@ -290,6 +296,7 @@ function gunTypes(){
 }
 
 function stats(){
+	setField('error', '', 'b', 0);
 
 	if (loggedIn) {
 		$("#ui_login").hide();
@@ -302,6 +309,7 @@ function stats(){
 
 }
 function profile(){
+	setField('error', '', 'b', 0);
 
 	if (loggedIn) {
 
@@ -356,6 +364,9 @@ function profile(){
 
 }
 function logout(){
+	setField('error', '', 'b', 0);
+	resetField('username');
+	resetField('password');
 
 	$("#ui_nav").hide();
 	$("#ui_login").show();
@@ -592,6 +603,10 @@ $(function(){
 		$("#ui_instructions").hide();
 		$("#ui_stats").hide();
 		$("#ui_profile").hide();
+		$("#errorMessage").show();
+
+		$('#error').show();
+
 
 		
 });
